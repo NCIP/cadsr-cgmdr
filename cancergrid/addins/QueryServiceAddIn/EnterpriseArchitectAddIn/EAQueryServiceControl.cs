@@ -60,7 +60,7 @@ namespace EnterpriseArchitectAddIn
                 }
                 else
                 {
-                    MessageBox.Show("Error getting selected data element");
+                    MessageBox.Show("Result is not a data element");
                 }
                 return;
             }
