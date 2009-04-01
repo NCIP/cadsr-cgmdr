@@ -135,4 +135,24 @@
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
+	<xs:element name="conceptual-domain" type="conceptual-domain"/>
+	<xs:complexType name="conceptual-domain">
+		<xs:complexContent>
+			<xs:extension base="common-info">
+				<xs:sequence>
+					<xs:element ref="values"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="representation-term" type="representation-term"/>
+	<xs:complexType name="representation-term">
+		<xs:complexContent>
+			<xs:extension base="common-info">
+				<xs:sequence>
+					<xs:element ref="values"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
 </xs:schema>

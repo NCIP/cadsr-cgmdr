@@ -37,7 +37,7 @@
         </field>
     </xsl:template>
     
-     <xsl:template match="class[@name=('gov.nih.nci.cadsr.domain.ValueMeaning', 'gov.nih.nci.cadsr.domain.ObjectClass','gov.nih.nci.cadsr.domain.Property')]/field[@name='conceptDerivationRule']">
+    <xsl:template match="class[@name=('gov.nih.nci.cadsr.domain.ValueMeaning', 'gov.nih.nci.cadsr.domain.ObjectClass','gov.nih.nci.cadsr.domain.Property', 'gov.nih.nci.cadsr.domain.ConceptualDomain', 'gov.nih.nci.cadsr.domain.Representation')]/field[@name='conceptDerivationRule']">
         <field name="{@name}">
             <xsl:apply-templates select="doc(data(@xlink:href))/xlink:httpQuery/queryResponse/class"/>
         </field>

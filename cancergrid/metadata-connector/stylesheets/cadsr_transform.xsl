@@ -142,6 +142,68 @@
 		</property>
 	</xsl:template>
 	
+	<xsl:template match="ConceptualDomain">
+		<!--<data-element xmlns="http://cancergrid.org/schema/result-set">-->
+		<conceptual-domain>
+			<names>
+				<id>US-NCICB-CACORE-CADSR-<xsl:value-of select="publicID"/>-<xsl:value-of select="version"/>
+				</id>
+				<preferred>
+					<xsl:value-of select="longName"/>
+				</preferred>
+				<all-names>
+					<name>
+						<xsl:value-of select="preferredName"/>
+					</name>
+					<name>
+						<xsl:value-of select="longName"/>
+					</name>
+				</all-names>
+			</names>
+			<definition>
+				<xsl:value-of select="preferredDefinition"/>
+			</definition>
+			<workflow-status>
+				<xsl:value-of select="workflowStatusName"/>
+			</workflow-status>
+			<registration-status>
+				<xsl:value-of select="registrationStatus"/>
+			</registration-status>
+			<xsl:apply-templates select="conceptDerivationRule/ConceptDerivationRule/componentConceptCollection"/>
+		</conceptual-domain>
+	</xsl:template>
+	
+	<xsl:template match="Representation">
+		<!--<data-element xmlns="http://cancergrid.org/schema/result-set">-->
+		<representation-term>
+			<names>
+				<id>US-NCICB-CACORE-CADSR-<xsl:value-of select="publicID"/>-<xsl:value-of select="version"/>
+				</id>
+				<preferred>
+					<xsl:value-of select="longName"/>
+				</preferred>
+				<all-names>
+					<name>
+						<xsl:value-of select="preferredName"/>
+					</name>
+					<name>
+						<xsl:value-of select="longName"/>
+					</name>
+				</all-names>
+			</names>
+			<definition>
+				<xsl:value-of select="preferredDefinition"/>
+			</definition>
+			<workflow-status>
+				<xsl:value-of select="workflowStatusName"/>
+			</workflow-status>
+			<registration-status>
+				<xsl:value-of select="registrationStatus"/>
+			</registration-status>
+			<xsl:apply-templates select="conceptDerivationRule/ConceptDerivationRule/componentConceptCollection"/>
+		</representation-term>
+	</xsl:template>
+	
 <xsl:template match="componentConceptCollection">
 	<conceptCollection>
 		<xsl:apply-templates select="ComponentConcept"/>
@@ -161,5 +223,5 @@
 	
 	
 	<!-- Filter out extra nodes -->
-	<xsl:template match="questionCollection|workflowStatusDescription|unresolvedIssue|registrationStatus|publicID|concept|origin|modifiedBy|latestVersionIndicator|endDate|deletedIndicator|dateModified|dateCreated|createdBy|changeNote|beginDate|version|prequestionCollection|dataElementDerivationCollection|parentDataElementRelationshipsCollection|dataElementConcept|derivedDataElement|childDataElementRelationshipsCollection|context|administeredComponentClassSchemeItemCollection|designationCollection|referenceDocumentCollection|administeredComponentContactCollection|definitionCollection|validValueCollection|parentValueDomainRelationshipCollection|dataElementCollection|childValueDomainRelationshipCollection|represention|conceptualDomain"/>
+	<xsl:template match="questionCollection|workflowStatusDescription|unresolvedIssue|registrationStatus|publicID|concept|origin|modifiedBy|latestVersionIndicator|endDate|deletedIndicator|dateModified|dateCreated|createdBy|changeNote|beginDate|version|prequestionCollection|dataElementDerivationCollection|parentDataElementRelationshipsCollection|dataElementConcept|derivedDataElement|childDataElementRelationshipsCollection|context|administeredComponentClassSchemeItemCollection|designationCollection|referenceDocumentCollection|administeredComponentContactCollection|definitionCollection|validValueCollection|parentValueDomainRelationshipCollection|dataElementCollection|childValueDomainRelationshipCollection"/>
 </xsl:stylesheet>
