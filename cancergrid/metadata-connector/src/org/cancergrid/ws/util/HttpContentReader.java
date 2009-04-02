@@ -23,7 +23,6 @@ package org.cancergrid.ws.util;
 
 import java.io.IOException;
 
-import java.net.URLEncoder;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -86,13 +85,13 @@ public class HttpContentReader
 
 		try
 		{
-			LOG.debug("Querying: " + httpUrl);
+			//LOG.debug("Querying: " + httpUrl);
 			if (method == Method.GET)
 			{
 				httpMethod = new GetMethod(httpUrl);
 				if (query != null && query.length() > 0)
 				{
-					httpMethod.setQueryString(URLEncoder.encode(query, "UTF-8"));
+                    httpMethod.setQueryString(query);
 				}
 			} else if (method == Method.POST)
 			{
