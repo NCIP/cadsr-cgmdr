@@ -339,7 +339,7 @@ namespace ExcelQueryServiceAddIn
                 if (attr.StartsWith("xs:"))
                     restrictionAttr = attr;
 
-                XAttribute restrictionAttribute = new XAttribute("base", attr);
+                XAttribute restrictionAttribute = new XAttribute("base", restrictionAttr);
 
                 XNamespace xs = "http://www.w3.org/2001/XMLSchema";
                 XDocument x =
