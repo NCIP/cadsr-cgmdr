@@ -40,6 +40,7 @@
             this.btnForward = new System.Windows.Forms.Button();
             this.btnBack = new System.Windows.Forms.Button();
             this.btnUse = new System.Windows.Forms.Button();
+            this.btnAnnotate = new System.Windows.Forms.Button();
             this.grpDetails = new System.Windows.Forms.GroupBox();
             this.tabControlDetails = new System.Windows.Forms.TabControl();
             this.tabPageDef = new System.Windows.Forms.TabPage();
@@ -182,13 +183,14 @@
             this.tableLayoutPanelResults.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanelResults.ColumnCount = 4;
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35F));
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 59F));
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
             this.tableLayoutPanelResults.Controls.Add(this.lstResults, 0, 0);
             this.tableLayoutPanelResults.Controls.Add(this.btnForward, 2, 1);
             this.tableLayoutPanelResults.Controls.Add(this.btnBack, 1, 1);
             this.tableLayoutPanelResults.Controls.Add(this.btnUse, 3, 1);
+            this.tableLayoutPanelResults.Controls.Add(this.btnAnnotate, 0, 1);
             this.tableLayoutPanelResults.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanelResults.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanelResults.Name = "tableLayoutPanelResults";
@@ -198,6 +200,7 @@
             this.tableLayoutPanelResults.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanelResults.Size = new System.Drawing.Size(274, 314);
             this.tableLayoutPanelResults.TabIndex = 1;
+            this.tableLayoutPanelResults.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanelResults_Paint);
             // 
             // lstResults
             // 
@@ -226,7 +229,7 @@
             // btnBack
             // 
             this.btnBack.Enabled = false;
-            this.btnBack.Location = new System.Drawing.Point(108, 287);
+            this.btnBack.Location = new System.Drawing.Point(103, 287);
             this.btnBack.MinimumSize = new System.Drawing.Size(28, 22);
             this.btnBack.Name = "btnBack";
             this.btnBack.Size = new System.Drawing.Size(28, 22);
@@ -246,6 +249,17 @@
             this.btnUse.Text = "Use";
             this.btnUse.UseVisualStyleBackColor = true;
             this.btnUse.Click += new System.EventHandler(this.use);
+            // 
+            // btnAnnotate
+            // 
+            this.btnAnnotate.Enabled = false;
+            this.btnAnnotate.Location = new System.Drawing.Point(3, 287);
+            this.btnAnnotate.Name = "btnAnnotate";
+            this.btnAnnotate.Size = new System.Drawing.Size(75, 23);
+            this.btnAnnotate.TabIndex = 4;
+            this.btnAnnotate.Text = "Annotate";
+            this.btnAnnotate.UseVisualStyleBackColor = true;
+            this.btnAnnotate.Click += new System.EventHandler(this.use);
             // 
             // grpDetails
             // 
@@ -694,5 +708,6 @@
         private System.Windows.Forms.Button btnBackCLS;
         private System.Windows.Forms.TabPage otherDetails;
         private System.Windows.Forms.WebBrowser wbDetailsOther;
+        private System.Windows.Forms.Button btnAnnotate;
     }
 }

@@ -209,6 +209,7 @@ namespace QueryServiceControl
                     return;
                 }
 
+                btnAnnotate.Enabled = false;
                 btnUse.Enabled = false;
                 btnBack.Enabled = false;
                 btnForward.Enabled = false;
@@ -235,7 +236,10 @@ namespace QueryServiceControl
                 {
                     query.startIndex = currentPage * pageSize;
                 }
+                //Workaround for SDK caused caDSR API bug.
                 query.numResults = pageSize + 1;
+                if (currentPage > 0)
+                    query.numResults = 200;
 
                 string response = qsm.queryString(query);
 
@@ -245,20 +249,28 @@ namespace QueryServiceControl
                 nsmanager = new XmlNamespaceManager(lastResult.NameTable);
                 nsmanager.AddNamespace("rs", "http://cancergrid.org/schema/result-set");
 
-                XmlNodeList nodeList = lastResult.DocumentElement.SelectNodes("/rs:result-set/rs:data-element", nsmanager);
-                if (nodeList == null || nodeList.Count == 0)
+                int rstSize = 6;
+                string[] resultSetTypes = new string[rstSize];
+                resultSetTypes[0] = "data-element";
+                resultSetTypes[1] = "concept";
+                resultSetTypes[2] = "object-class";
+                resultSetTypes[3] = "property";
+                resultSetTypes[4] = "conceptual-domain";
+                resultSetTypes[5] = "representation-term";
+
+                XmlNodeList nodeList = null;
+                for (int i = 0; i < rstSize; i++)
                 {
-                    nodeList = lastResult.DocumentElement.SelectNodes("/rs:result-set/rs:concept", nsmanager);
+                    nodeList = lastResult.DocumentElement.SelectNodes("/rs:result-set/rs:"+resultSetTypes[i], nsmanager);
+                    if (i > 0)
+                        btnAnnotate.Enabled = false;
+                    else
+                        btnAnnotate.Enabled = true;
 
-                    if (nodeList == null || nodeList.Count == 0)
-                    {
-                        nodeList = lastResult.DocumentElement.SelectNodes("/rs:result-set/rs:object-class", nsmanager);
+                    if (nodeList != null && nodeList.Count > 0)
+                        break;
 
-                        if (nodeList == null || nodeList.Count == 0)
-                            nodeList = lastResult.DocumentElement.SelectNodes("/rs:result-set/rs:property", nsmanager);
-                    }
                 }
-
                 if (nodeList == null || nodeList.Count == 0)
                 {
                     //statusMsg.Text = "No result";
@@ -515,7 +527,7 @@ namespace QueryServiceControl
                     vdNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:values", nsmanager);
                     propsNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:properties", nsmanager);
                     defNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:definition", nsmanager);
-                    ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:object-class[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
+                    ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
                     if (ccNode == null || ccNode.InnerXml.Length == 0)
                         ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:property[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);              
                 }
@@ -567,7 +579,7 @@ namespace QueryServiceControl
                 if (vdNode != null)
                 {
                     XElement x = XElement.Parse(vdNode.OuterXml);
-                    if (x.Element(rs + "enumerated") != null)
+                    if (x.Element(rs + "enumerated") != null && x.Element(rs + "enumerated").Element(rs + "valid-value") != null)
                     {
 
                         if (x.Element(rs + "enumerated").Element(rs + "valid-value").Element(rs + "conceptCollection") != null)
@@ -761,6 +773,11 @@ namespace QueryServiceControl
         }
 
         private void grpDetails_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tableLayoutPanelResults_Paint(object sender, PaintEventArgs e)
         {
 
         }
