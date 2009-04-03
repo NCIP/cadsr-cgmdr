@@ -29,6 +29,7 @@ namespace ExcelQueryServiceAddIn
         {
             XmlNode srcNode = null;
             string selectedId = null;
+            bool annotate = false;
 
             try
             {
@@ -41,6 +42,13 @@ namespace ExcelQueryServiceAddIn
                     }
                     else if (((Button)sender).Name == "btnUse")
                     {
+                        annotate = false;
+                        srcNode = lastResult;
+                        selectedId = getSelectedItem(lstResults).ID;
+                    }
+                    else if (((Button)sender).Name == "btnAnnotate")
+                    {
+                        annotate = true;
                         srcNode = lastResult;
                         selectedId = getSelectedItem(lstResults).ID;
                     }
@@ -62,12 +70,13 @@ namespace ExcelQueryServiceAddIn
 
             XElement rootNode = XElement.Parse(srcNode.OuterXml);
 
-            string[] elements = new string[4];
+            string[] elements = new string[6];
             elements[0] = "data-element";
             elements[1] = "object-class";
             elements[2] = "concept";
             elements[3] = "property";
-
+            elements[4] = "conceptual-domain";
+            elements[5] = "representation-term";
 
             for (int i = 0; i < elements.Length; i++)
             {
@@ -81,7 +90,7 @@ namespace ExcelQueryServiceAddIn
                     switch (elements[i])
                     {
                         case "data-element":
-                            handleCDE(selectedNode);
+                            handleCDE(selectedNode, annotate);
                             break;
                         case "object-class":
                             handleOC(selectedNode);
@@ -91,6 +100,12 @@ namespace ExcelQueryServiceAddIn
                             break;
                         case "concept":
                             handleConcept(selectedNode);
+                            break;
+                        case "conceptual-domain":
+                            handleCommon(selectedNode, "cd");
+                            break;
+                        case "representation-term":
+                            handleCommon(selectedNode, "rt");
                             break;
                     }
                 }
@@ -147,7 +162,7 @@ namespace ExcelQueryServiceAddIn
         /// TODO: Refactor code
         /// </summary>
         /// <param name="selectedNode">Data element to use</param>
-        protected void handleCDE(XElement selectedNode)
+        protected void handleCDE(XElement selectedNode, bool annotate)
         {
             string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
 
@@ -157,7 +172,7 @@ namespace ExcelQueryServiceAddIn
                 id = idarr[idarr.Length - 2] + " v." + idarr[idarr.Length - 1];
             }
             string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
-            string preferredNameTag = preferredName.Replace(" ", "_");
+            string preferredNameTag = preferredName.Replace(" ", "_").Replace(",", "_"); ;
             string definition = selectedNode.Element(rs + "definition").Value;
             if (definition == null || definition.Length == 0)
             {
@@ -273,43 +288,58 @@ namespace ExcelQueryServiceAddIn
                     attrWithDefWithConc.Remove(attrWithDefWithConc.LastIndexOf(','));
                     attr.Trim();
                 }
-                try
-                {
-                    xmlMap = workbook.XmlMaps.Add(x.ToString(), (selected.Count > 1) ? preferredNameTag + "List" : preferredNameTag);
-                    xmlMap.ShowImportExportValidationErrors = true;
-                    xmlMap.AdjustColumnWidth = true;
-                    selected.XPath.SetValue(xmlMap, (selected.Count > 1) ? "/rs:" + preferredNameTag + "List/rs:" + preferredNameTag : "/rs:" + preferredNameTag, "xmlns:rs=\"" + rs.NamespaceName + "\"", selected.Count > 1);
-                }
-                catch (ArgumentException ex)
-                {
-                    MessageBox.Show(ex.Message, "Range Selection Error");
-                    xmlMap.Delete();
-                    return;
-                }
 
-                selected.Validation.Delete();
+                if (attr.Length > 0)
+                {
+                    try
+                    {
+                        int sc = selected.Count;
+                        xmlMap = workbook.XmlMaps.Add(x.ToString(), (selected.Count > 1) ? preferredNameTag + "List" : preferredNameTag);
+                        xmlMap.ShowImportExportValidationErrors = true;
+                        xmlMap.AdjustColumnWidth = true;
+                        selected.XPath.SetValue(xmlMap, (selected.Count > 1) ? "/rs:" + preferredNameTag + "List/rs:" + preferredNameTag : "/rs:" + preferredNameTag, "xmlns:rs=\"" + rs.NamespaceName + "\"", selected.Count > 1);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        MessageBox.Show(ex.Message, "Range Selection Error");
+                        xmlMap.Delete();
+                        return;
+                    }
+                    selected.Validation.Delete();
+                    if (!annotate)
+                    {
+                        //xs:enumeration
+                        selected.Validation.Add(Excel.XlDVType.xlValidateList, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, attr, attr);
+                        selected.Validation.InputTitle = "Select a value from the list";
+                        //WORKAROUND: TODO: Fix this one way or another
+                        try
+                        {
+                            selected.Validation.InputMessage = attrWithDef.Replace(",", "\n");
+                        }
+                        catch (Exception)
+                        {
+                            //If the exception was thrown setting Validation Input Message, set the message in comment)
+                            selected.AddComment(attrWithDef.Replace(",", "\n"));
+                            selected.Comment.Shape.TextFrame.AutoSize = true;
+                        }
 
-                //xs:enumeration
-                selected.Validation.Add(Excel.XlDVType.xlValidateList, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, attr, attr);
-                selected.Validation.InputTitle = "Select a value from the list";
-                //WORKAROUND: TODO: Fix this one way or another
-                try
-                {
-                    selected.Validation.InputMessage = attrWithDef.Replace(",", "\n");
+                        selected.Validation.ErrorMessage = "Please select a value from the enumeration list.";
+                    }
                 }
-                catch (Exception)
-                {
-                    //If the exception was thrown setting Validation Input Message, set the message in comment)
-                    selected.AddComment(attrWithDef.Replace(",", "\n"));
-                    selected.Comment.Shape.TextFrame.AutoSize = true;
-                }
-                
-                selected.Validation.ErrorMessage = "Please select a value from the enumeration list.";
+               
             }
             else if (selectedNode.Element(rs + "values").Element(rs + "non-enumerated") != null)
             {
                 attr = selectedNode.Element(rs + "values").Element(rs + "non-enumerated").Element(rs + "data-type").Value;
                 attrWithDef = "data-type: " + selectedNode.Element(rs + "values").Element(rs + "non-enumerated").Element(rs + "data-type").Value + "\nUnits: " + selectedNode.Element(rs + "values").Element(rs + "non-enumerated").Element(rs + "units").Value;
+               
+
+                //Next 5 lines workaround for attributes that do not conform to schema
+                string restrictionAttr = "xs:string";
+                if (attr.StartsWith("xs:"))
+                    restrictionAttr = attr;
+
+                XAttribute restrictionAttribute = new XAttribute("base", attr);
 
                 XNamespace xs = "http://www.w3.org/2001/XMLSchema";
                 XDocument x =
@@ -341,7 +371,7 @@ namespace ExcelQueryServiceAddIn
                                 new XAttribute("name", preferredNameTag),
                                 new XElement(xs + "annotation", definition),
                                 new XElement(xs + "restriction",
-                                    new XAttribute("base", attr)
+                                    restrictionAttribute
                                     )
                                 )
                             )
@@ -360,201 +390,204 @@ namespace ExcelQueryServiceAddIn
                     return;
                 }
 
-                selected.Validation.Delete();
+                if (!annotate)
+                {
+                    selected.Validation.Delete();
 
-                if (attr == "xs:nonNegativeInteger")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlGreaterEqual, 0, 0);
-                    selected.Validation.InputTitle = "Enter a positive integer";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a positive number";
+                    if (attr == "xs:nonNegativeInteger")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlGreaterEqual, 0, 0);
+                        selected.Validation.InputTitle = "Enter a positive integer";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a positive number";
+                    }
+                    else if (attr == "xs:nonPositiveInteger")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlLessEqual, 0, 0);
+                        selected.Validation.InputTitle = "Enter a negative integer";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a negative number";
+                    }
+                    else if (attr == "xs:positiveInteger")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlGreater, 1, 1);
+                        selected.Validation.InputTitle = "Enter an integer number greater than 0(zero)";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter an integer number 0(zero)";
+                    }
+                    else if (attr == "xs:integer")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter an integer number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter an integer number";
+                    }
+                    else if (attr == "xs:byte")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, SByte.MinValue, SByte.MaxValue);
+                        selected.Validation.InputTitle = "Enter a byte number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a byte number";
+                    }
+                    else if (attr == "xs:unsignedByte")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Byte.MinValue, Byte.MaxValue);
+                        selected.Validation.InputTitle = "Enter a byte number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a byte number";
+                    }
+                    else if (attr == "xs:short")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Int16.MinValue, Int16.MaxValue);
+                        selected.Validation.InputTitle = "Enter an integer number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter an integer number";
+                    }
+                    else if (attr == "xs:unsignedShort")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, UInt16.MinValue, UInt16.MaxValue);
+                        selected.Validation.InputTitle = "Enter an integer number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter an integer number";
+                    }
+                    else if (attr == "xs:int")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Int32.MinValue, Int32.MaxValue);
+                        selected.Validation.InputTitle = "Enter an integer number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter an integer number";
+                    }
+                    else if (attr == "xs:unsignedInt")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, UInt32.MinValue, UInt32.MaxValue);
+                        selected.Validation.InputTitle = "Enter a positive integer number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a positive integer number";
+                    }
+                    else if (attr == "xs:long")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Int64.MinValue, Int64.MaxValue);
+                        selected.Validation.InputTitle = "Enter an integer number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter an integer number";
+                    }
+                    else if (attr == "xs:unsignedLong")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, UInt64.MinValue, UInt64.MaxValue);
+                        selected.Validation.InputTitle = "Enter a positive integer number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a positive integer number";
+                    }
+                    else if (attr == "xs:float")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Single.MinValue, Single.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a decimal number";
+                    }
+                    else if (attr == "xs:double")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Double.MinValue, Double.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a decimal number";
+                    }
+                    else if (attr == "xs:decimal")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please enter a decimal number";
+                    }
+                    else if (attr == "xs:date")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDate, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlGreaterEqual, "=DATE(1900,1,1)", "=DATE(1900,1,1)");
+                        selected.Validation.InputTitle = "Enter a date";
+                        selected.Validation.InputMessage = "Date format: =DATE(year,month,day)";
+                        selected.Validation.ErrorMessage = "Please enter correct date format: =DATE(year,month,day)";
+                    }
+                    else if (attr == "xs:boolean")
+                    {
+                        selected.Validation.Add(Excel.XlDVType.xlValidateList, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, "true,false", "true,false");
+                        selected.Validation.InputTitle = "Select True or False";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a boolean value from the list";
+                    }
+                    /*
+                    else if (attr == "xs:duration")
+                    {
+                        //xs:duration
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    else if (attr == "xs:dateTime")
+                    {
+                        //xs:dateTime
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    else if (attr == "xs:time")
+                    {
+                        //xs:time
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    else if (attr == "xs:gYearMonth")
+                    {
+                        //xs:gYearMonth
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    else if (attr == "xs:gYear")
+                    {
+                        //xs:gYear
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    else if (attr == "xs:gMonthDay")
+                    {
+                        //xs:gMonthDay
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    else if (attr == "xs:gDay")
+                    {
+                        //xs:gDay
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    else if (attr == "xs:gMonth")
+                    {
+                        //xs:gMonth
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    else if (attr == "xs:anyURI")
+                    {
+                        //xs:anyURI
+                        selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
+                        selected.Validation.InputTitle = "Enter a decimal number";
+                        selected.Validation.InputMessage = " ";
+                        selected.Validation.ErrorMessage = "Please select a decimal number";
+                    }
+                    */
                 }
-                else if (attr == "xs:nonPositiveInteger")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlLessEqual, 0, 0);
-                    selected.Validation.InputTitle = "Enter a negative integer";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a negative number";
-                }
-                else if (attr == "xs:positiveInteger")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlGreater, 1, 1);
-                    selected.Validation.InputTitle = "Enter an integer number greater than 0(zero)";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter an integer number 0(zero)";
-                }
-                else if (attr == "xs:integer")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter an integer number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter an integer number";
-                }
-                else if (attr == "xs:byte")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, SByte.MinValue, SByte.MaxValue);
-                    selected.Validation.InputTitle = "Enter a byte number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a byte number";
-                }
-                else if (attr == "xs:unsignedByte")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Byte.MinValue, Byte.MaxValue);
-                    selected.Validation.InputTitle = "Enter a byte number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a byte number";
-                }
-                else if (attr == "xs:short")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Int16.MinValue, Int16.MaxValue);
-                    selected.Validation.InputTitle = "Enter an integer number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter an integer number";
-                }
-                else if (attr == "xs:unsignedShort")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, UInt16.MinValue, UInt16.MaxValue);
-                    selected.Validation.InputTitle = "Enter an integer number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter an integer number";
-                }
-                else if (attr == "xs:int")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Int32.MinValue, Int32.MaxValue);
-                    selected.Validation.InputTitle = "Enter an integer number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter an integer number";
-                }
-                else if (attr == "xs:unsignedInt")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, UInt32.MinValue, UInt32.MaxValue);
-                    selected.Validation.InputTitle = "Enter a positive integer number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a positive integer number";
-                }
-                else if (attr == "xs:long")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Int64.MinValue, Int64.MaxValue);
-                    selected.Validation.InputTitle = "Enter an integer number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter an integer number";
-                }
-                else if (attr == "xs:unsignedLong")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateWholeNumber, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, UInt64.MinValue, UInt64.MaxValue);
-                    selected.Validation.InputTitle = "Enter a positive integer number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a positive integer number";
-                }
-                else if (attr == "xs:float")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Single.MinValue, Single.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a decimal number";
-                }
-                else if (attr == "xs:double")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Double.MinValue, Double.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a decimal number";
-                }
-                else if (attr == "xs:decimal")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please enter a decimal number";
-                }
-                else if (attr == "xs:date")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDate, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlGreaterEqual, "=DATE(1900,1,1)", "=DATE(1900,1,1)");
-                    selected.Validation.InputTitle = "Enter a date";
-                    selected.Validation.InputMessage = "Date format: =DATE(year,month,day)";
-                    selected.Validation.ErrorMessage = "Please enter correct date format: =DATE(year,month,day)";
-                }
-                else if (attr == "xs:boolean")
-                {
-                    selected.Validation.Add(Excel.XlDVType.xlValidateList, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, "true,false", "true,false");
-                    selected.Validation.InputTitle = "Select True or False";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a boolean value from the list";
-                }
-                /*
-                else if (attr == "xs:duration")
-                {
-                    //xs:duration
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                else if (attr == "xs:dateTime")
-                {
-                    //xs:dateTime
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                else if (attr == "xs:time")
-                {
-                    //xs:time
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                else if (attr == "xs:gYearMonth")
-                {
-                    //xs:gYearMonth
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                else if (attr == "xs:gYear")
-                {
-                    //xs:gYear
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                else if (attr == "xs:gMonthDay")
-                {
-                    //xs:gMonthDay
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                else if (attr == "xs:gDay")
-                {
-                    //xs:gDay
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                else if (attr == "xs:gMonth")
-                {
-                    //xs:gMonth
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                else if (attr == "xs:anyURI")
-                {
-                    //xs:anyURI
-                    selected.Validation.Add(Excel.XlDVType.xlValidateDecimal, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, Decimal.MinValue, Decimal.MaxValue);
-                    selected.Validation.InputTitle = "Enter a decimal number";
-                    selected.Validation.InputMessage = " ";
-                    selected.Validation.ErrorMessage = "Please select a decimal number";
-                }
-                */
             }
 
             //TODO: Fix the issue that requires this to be commented out.
@@ -574,8 +607,9 @@ namespace ExcelQueryServiceAddIn
             {
                 c = (Excel.Range)cdeList.Cells[i, 1];
             }
-
-            string instanceNum = xmlMap.Name.Substring(xmlMap.Name.LastIndexOf("_Map") + 4);
+            string instanceNum = "";
+            if (xmlMap != null)
+                instanceNum = xmlMap.Name.Substring(xmlMap.Name.LastIndexOf("_Map") + 4);
 
             //Since the XML map can be deleted if an exception is thrown, just set address manually.
             string selectedAddress = selected.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
@@ -590,74 +624,93 @@ namespace ExcelQueryServiceAddIn
             cdeList.Protect(dummyPass, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
 
             // Create/Format Header
-            if (selected.Count > 1)
+            if (!annotate)
             {
-                Excel.Range firstCell = (Excel.Range)selected.Cells[1, 1];
+                if (selected.Count > 1)
+                {
+                    Excel.Range firstCell = (Excel.Range)selected.Cells[1, 1];
 
 
-                firstCell.Validation.Delete();
-                firstCell.Value2 = ((string)firstCell.Value2).Substring(((string)firstCell.Value2).IndexOf(":") + 1).Replace("_", " ");
-                firstCell.Hyperlinks.Add(firstCell, "", getSelectedRangeAddress(c), Type.Missing, firstCell.Value2);
-                firstCell.Font.ColorIndex = 2;
-                firstCell.Font.Underline = false;
+                    firstCell.Validation.Delete();
+                    firstCell.Value2 = ((string)firstCell.Value2).Substring(((string)firstCell.Value2).IndexOf(":") + 1).Replace("_", " ");
+                    firstCell.Hyperlinks.Add(firstCell, "", getSelectedRangeAddress(c), Type.Missing, firstCell.Value2);
+                    firstCell.Font.ColorIndex = 2;
+                    firstCell.Font.Underline = false;
+                }
+                else if (selected.Count == 1)
+                {
+                    selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent1;
+                    selected.Interior.TintAndShade = 0.6;
+
+                    if (selected.Column != 1)
+                    {
+                        try
+                        {
+                            Excel.Range leftCell = selected.get_Offset(0, -1);
+                            if (leftCell != null && (leftCell.Value2 == null || ((string)leftCell.Value2).Length == 0))
+                            {
+                                leftCell.Value2 = id + ":" + preferredName;
+                                leftCell.Hyperlinks.Add(leftCell, "", getSelectedRangeAddress(c), Type.Missing, leftCell.Value2);
+                                leftCell.Font.Bold = true;
+                                leftCell.Font.Underline = false;
+                                leftCell.Font.ColorIndex = 1;
+                                return;
+                            }
+
+                            Excel.Range upCell = selected.get_Offset(-1, 0);
+                            if (upCell != null && (upCell.Value2 == null || ((string)upCell.Value2).Length == 0))
+                            {
+                                upCell.Value2 = id + ":" + preferredName;
+                                upCell.Hyperlinks.Add(upCell, "", getSelectedRangeAddress(c), Type.Missing, upCell.Value2);
+                                upCell.Font.Bold = true;
+                                upCell.Font.Underline = false;
+                                upCell.Font.ColorIndex = 1;
+                                return;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            //Unable to get valid cell
+                            MessageBox.Show("Unable to find suitable location to insert header/label", "Header/Label not created");
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            Excel.Range upCell = selected.get_Offset(-1, 0);
+                            if (upCell != null && (upCell.Value2 == null || ((string)upCell.Value2).Length == 0))
+                            {
+                                upCell.Value2 = preferredName;
+                                upCell.Hyperlinks.Add(upCell, "", getSelectedRangeAddress(c), Type.Missing, upCell.Value2);
+                                upCell.Font.Bold = true;
+                                upCell.Font.Underline = false;
+                                upCell.Font.ColorIndex = 1;
+                                return;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            MessageBox.Show("Unable to find suitable location to insert header/label", "Header/Label not created");
+                        }
+                    }
+                }
             }
-            else if (selected.Count == 1)
+            else
             {
-                selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent1;
-                selected.Interior.TintAndShade = 0.6;
-
-                if (selected.Column != 1)
+                selected.Value2 = id ;
+                selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, selected.Value2);
+                selected.Font.Bold = true;
+                selected.Font.Underline = false;
+                selected.Font.ColorIndex = 1;
+                Excel.Range rightCell = selected.get_Offset(0, 1);
+                if (rightCell != null && (rightCell.Value2 == null || ((string)rightCell.Value2).Length == 0))
                 {
-                    try
-                    {
-                        Excel.Range leftCell = selected.get_Offset(0, -1);
-                        if (leftCell != null && (leftCell.Value2 == null || ((string)leftCell.Value2).Length == 0))
-                        {
-                            leftCell.Value2 = id + ":" + preferredName;
-                            leftCell.Hyperlinks.Add(leftCell, "", getSelectedRangeAddress(c), Type.Missing, leftCell.Value2);
-                            leftCell.Font.Bold = true;
-                            leftCell.Font.Underline = false;
-                            leftCell.Font.ColorIndex = 1;
-                            return;
-                        }
+                    rightCell.Value2 = preferredName;
+                    rightCell.Font.Bold = true;
+                    rightCell.Font.Underline = false;
+                }
 
-                        Excel.Range upCell = selected.get_Offset(-1, 0);
-                        if (upCell != null && (upCell.Value2 == null || ((string)upCell.Value2).Length == 0))
-                        {
-                            upCell.Value2 = id+":"+preferredName;
-                            upCell.Hyperlinks.Add(upCell, "", getSelectedRangeAddress(c), Type.Missing, upCell.Value2);
-                            upCell.Font.Bold = true;
-                            upCell.Font.Underline = false;
-                            upCell.Font.ColorIndex = 1;
-                            return;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        //Unable to get valid cell
-                        MessageBox.Show("Unable to find suitable location to insert header/label", "Header/Label not created");
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        Excel.Range upCell = selected.get_Offset(-1, 0);
-                        if (upCell != null && (upCell.Value2 == null || ((string)upCell.Value2).Length == 0))
-                        {
-                            upCell.Value2 = preferredName;
-                            upCell.Hyperlinks.Add(upCell, "", getSelectedRangeAddress(c), Type.Missing, upCell.Value2);
-                            upCell.Font.Bold = true;
-                            upCell.Font.Underline = false;
-                            upCell.Font.ColorIndex = 1;
-                            return;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        MessageBox.Show("Unable to find suitable location to insert header/label", "Header/Label not created");
-                    }
-                }
             }
         }
 
@@ -783,7 +836,7 @@ namespace ExcelQueryServiceAddIn
                 }
             }
 
-            string label = preferredName;
+            string label = id+ ":"+preferredName;
 
             //Get selected range
             Excel.Range selected = (Excel.Range)application.Selection;
@@ -840,17 +893,17 @@ namespace ExcelQueryServiceAddIn
 
         }
 
-
-        /// <summary>
-        /// Handles insertion of concept element into worksheet.
-        /// 
-        /// TODO: Refactor code
-        /// TODO: Is two way hyperlink possible?
-        /// </summary>
-        /// <param name="selectedNode">Concept element to use</param>
-        protected void handleConcept(XElement selectedNode)
+        protected void handleCommon(XElement selectedNode, string name)
         {
             string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
+
+            //Removing the institution identifying prefix from CADSR elements on client request
+            if (id.Contains("-CADSR-"))
+            {
+                string[] idarr = id.Split('-');
+                id = idarr[idarr.Length - 2] + " v." + idarr[idarr.Length - 1];
+            }
+
             string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
             string definition = selectedNode.Element(rs + "definition").Value;
             if (definition == null || definition.Length == 0)
@@ -868,6 +921,103 @@ namespace ExcelQueryServiceAddIn
                 }
             }
 
+            string label = id + ":" + preferredName;
+
+            //Get selected range
+            Excel.Range selected = (Excel.Range)application.Selection;
+            if (selected.Value2 == null || selected.Value2.ToString().Length == 0)
+            {
+                selected.Value2 = label;
+            }
+            else
+            {
+                //Refuse to add?  Do you have to remove first?
+            }
+
+
+            //Create concept list if not exists
+
+            propList = useList(propList, name+"_list");
+
+            //Add new concept entry to concept_list
+            propList.Unprotect(dummyPass);
+            Excel.Range c = (Excel.Range)propList.Cells[2, 1];
+
+            Excel.Range found = propList.Cells.Find(id, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
+            if (found == null) //if (existingIndex == 0)
+            {
+                for (int i = 3; c.Value2 != null; i++)
+                {
+                    c = (Excel.Range)ocList.Cells[i, 1];
+
+                }
+
+                c.Value2 = id;
+                c.Next.Value2 = preferredName;
+                c.Next.Next.Value2 = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
+                //c.Next.Next.Next.Value2 = attr.Trim().Replace(",", "\n\n").Replace("&#44;", ", ").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
+
+                //Cells mapped counter
+                c.Next.Next.Next.Next.Value2 = 1;
+            }
+            else
+            {
+                found.Next.Next.Next.Next.Value2 = 1 + Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString());
+            }
+
+            propList.Protect(dummyPass, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+
+            /* Remove hyperlinks for now until a suitable two way link method is found */
+            selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, label);
+
+            selected.Font.Bold = true;
+            selected.Font.Underline = false;
+            selected.Font.ColorIndex = 1;
+            selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
+            selected.Interior.TintAndShade = 0.2;
+
+        }
+
+
+        /// <summary>
+        /// Handles insertion of concept element into worksheet.
+        /// 
+        /// TODO: Refactor code
+        /// TODO: Is two way hyperlink possible?
+        /// </summary>
+        /// <param name="selectedNode">Concept element to use</param>
+        protected void handleConcept(XElement selectedNode)
+        {
+            string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
+            string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
+            string definition = selectedNode.Element(rs + "definition").Value;
+            
+            string source = "";
+
+            if (id.Contains("DESCLOGICCONCEPT"))
+                source = "NCI: EVS Desc. Logic";
+            else if (id.Contains("METATHESAURUSCONCEPT"))
+                source = "NCI: EVS Metathesaurus";
+            else if (id.Contains(".nlm."))
+                source = "Cancergrid: NLM";
+            else if (id.Contains("NMDP"))
+                source = "NMDP: NCI Approved EVS Concepts";
+
+                if (definition == null || definition.Length == 0)
+                {
+                    definition = "(No definition supplied)";
+                }
+                else
+                {
+                    //Handle special caDSR/EVS format
+                    definition = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("<![CDATA[", "").Replace("]]>", "");
+                    if (definition.Contains("<def-source>"))
+                    {
+                        XElement e = XElement.Parse("<def>" + definition + "</def>");
+                        definition = e.Element("def-definition").Value + "\n(Source: " + e.Element("def-source").Value + ")";
+                    }
+                }
+
             string code = null;
             if (id.StartsWith("http"))
             {
@@ -879,6 +1029,9 @@ namespace ExcelQueryServiceAddIn
             }
             string label = code + ": " + preferredName;
 
+
+
+
             //Get selected range
             Excel.Range selected = (Excel.Range)application.Selection;
             if (selected.Value2 == null || selected.Value2.ToString().Length == 0)
@@ -887,7 +1040,7 @@ namespace ExcelQueryServiceAddIn
             }
             else
             {
-                selected.Value2 += ";"+label;
+                selected.Value2 = label + ";" + selected.Value2;
             }
 
             //Check for existing concept (May need to remove this to allow duplicates, so that two way link can be established)
@@ -937,7 +1090,7 @@ namespace ExcelQueryServiceAddIn
                 c.Next.Value2 = preferredName;
                 c.Next.Next.Value2 = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
                 //c.Next.Next.Next.Value2 = attr.Trim().Replace(",", "\n\n").Replace("&#44;", ", ").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
-                
+                c.Next.Next.Next.Value2 = source;
                 //Cells mapped counter
                 c.Next.Next.Next.Next.Value2 = 1;
             }
@@ -1163,16 +1316,16 @@ namespace ExcelQueryServiceAddIn
             column.Next.Next.EntireColumn.WrapText = true;
             column.Next.Next.EntireColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignJustify;
 
-            //Properties/Values
-            /*
-            column.Next.Next.Next.Value2 = "Properties/Values";
+            //Source
+            
+            column.Next.Next.Next.Value2 = "Source";
             column.Next.Next.Next.Font.Bold = true;
             column.Next.Next.Next.Font.Background = Excel.XlBackground.xlBackgroundOpaque;
-            column.Next.Next.Next.EntireColumn.ColumnWidth = 50;
+            column.Next.Next.Next.EntireColumn.ColumnWidth = 30;
             column.Next.Next.Next.EntireColumn.VerticalAlignment = Excel.XlVAlign.xlVAlignTop;
             column.Next.Next.Next.EntireColumn.WrapText = true;
             column.Next.Next.Next.EntireColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignJustify;
-            */
+            
 
             //Definition
             column.Next.Next.Next.Next.Value2 = "Mapped Cells";

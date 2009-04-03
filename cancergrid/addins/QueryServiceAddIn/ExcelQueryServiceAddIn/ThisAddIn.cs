@@ -76,14 +76,15 @@ namespace ExcelQueryServiceAddIn
         private void unmapHeaderClick(Office.CommandBarButton button, ref bool Cancel)
         {
             Excel.Range selected = (Excel.Range)this.Application.Selection;
-            Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
 
-            string[] codes = selected.Text.ToString().Split(';');
             selected.Cells.Clear();
             selected.Cells.ClearContents();
             selected.Cells.ClearFormats();
             selected.Cells.ClearNotes();
 
+            Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
+            string[] codes = selected.Text.ToString().Split(';');
+      
             if (conceptList != null)
             {
                 conceptList.Unprotect("dummy_password");
