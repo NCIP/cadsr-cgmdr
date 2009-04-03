@@ -67,6 +67,18 @@
 			<description>The NCI EVS is a set of services and resources that address NCI's needs for controlled vocabulary.</description>
 			<webUrl>http://ncicb.nci.nih.gov/NCICB/infrastructure/cacore_overview/vocabulary</webUrl>			
 		</query_service>
+		<query_service name="EVS-DescLogicConcept-CUI"
+			class="org.cancergrid.ws.query.RestQueryService"
+			serviceUrl="http://cabio.nci.nih.gov/cacore32/GetXML"
+			cache_collection_id="EVS-DescLogicConcept-CUI" cache="false"
+			cache_provider="HibernateCacheProvider"
+			category="CONCEPT" connection_type="REST"
+			requestSequence="DescLogicConceptCUI_query"
+			digestSequence="DescLogicConcept_construct fixtag DescLogicConcept_transform add_cg_namespace">
+			<title>NCI Enterprise Vocabulary Services (EVS)</title>
+			<description>The NCI EVS is a set of services and resources that address NCI's needs for controlled vocabulary.</description>
+			<webUrl>http://ncicb.nci.nih.gov/NCICB/infrastructure/cacore_overview/vocabulary</webUrl>			
+		</query_service>
 		<query_service name="EVS-MetaThesaurusConcept"
 			class="org.cancergrid.ws.query.RestQueryService"
 			serviceUrl="http://cabio.nci.nih.gov/cacore32/GetXML"
