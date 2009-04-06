@@ -49,10 +49,14 @@
 	</xs:complexType>
 	<xs:element name="values" type="values"/>
 	<xs:complexType name="values">
-		<xs:choice>
-			<xs:element ref="enumerated"/>
-			<xs:element ref="non-enumerated"/>
-		</xs:choice>
+		<xs:complexContent>
+			<xs:extension base="common-info">
+				<xs:choice>
+					<xs:element ref="enumerated"/>
+					<xs:element ref="non-enumerated"/>
+				</xs:choice>
+			</xs:extension>
+		</xs:complexContent>
 	</xs:complexType>
 	<xs:element name="non-enumerated" type="non-enumerated"/>
 	<xs:complexType name="non-enumerated">
@@ -162,12 +166,25 @@
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
+	<!-- Rep Term related elements/types -->
 	<xs:element name="representation-term" type="representation-term"/>
 	<xs:complexType name="representation-term">
 		<xs:complexContent>
 			<xs:extension base="common-info">
 				<xs:sequence>
 					<xs:element ref="values"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!-- DEC related elements/types -->
+	<xs:element name="data-element-concept" type="data-element-concept"/>
+	<xs:complexType name="data-element-concept">
+		<xs:complexContent>
+			<xs:extension base="common-info">
+				<xs:sequence>
+					<xs:element minOccurs="0" ref="property"/>
+					<xs:element minOccurs="0" ref="object-class"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
