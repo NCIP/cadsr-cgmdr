@@ -48,7 +48,19 @@
             <xsl:apply-templates select="doc(data(@xlink:href))/xlink:httpQuery/queryResponse/class"/>
         </field>
     </xsl:template>
+
+    <xsl:template match="field[@name='objectClass']">
+        <field name="{@name}">
+            <xsl:apply-templates select="doc(data(@xlink:href))/xlink:httpQuery/queryResponse/class"/>
+        </field>
+    </xsl:template>
     
+    <xsl:template match="field[@name='property']">
+        <field name="{@name}">
+            <xsl:apply-templates select="doc(data(@xlink:href))/xlink:httpQuery/queryResponse/class"/>
+        </field>
+    </xsl:template>
+
 	<!-- Stop expanding after this one     -->
     <xsl:template match="class[@name='gov.nih.nci.cadsr.domain.ComponentConcept']/field[@name='concept']">
         <field name="{@name}">
