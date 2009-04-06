@@ -70,13 +70,15 @@ namespace ExcelQueryServiceAddIn
 
             XElement rootNode = XElement.Parse(srcNode.OuterXml);
 
-            string[] elements = new string[6];
+            string[] elements = new string[8];
             elements[0] = "data-element";
             elements[1] = "object-class";
             elements[2] = "concept";
             elements[3] = "property";
             elements[4] = "conceptual-domain";
             elements[5] = "representation-term";
+            elements[6] = "data-element-concept";
+            elements[7] = "values";
 
             for (int i = 0; i < elements.Length; i++)
             {
@@ -107,6 +109,13 @@ namespace ExcelQueryServiceAddIn
                         case "representation-term":
                             handleCommon(selectedNode, "rt");
                             break;
+                        case "values":
+                            handleCommon(selectedNode, "vd");
+                            break;
+                        case "data-element-concept":
+                            handleCommon(selectedNode, "dec");
+                            break;
+
                     }
                 }
             }
@@ -332,7 +341,7 @@ namespace ExcelQueryServiceAddIn
             {
                 attr = selectedNode.Element(rs + "values").Element(rs + "non-enumerated").Element(rs + "data-type").Value;
                 attrWithDef = "data-type: " + selectedNode.Element(rs + "values").Element(rs + "non-enumerated").Element(rs + "data-type").Value + "\nUnits: " + selectedNode.Element(rs + "values").Element(rs + "non-enumerated").Element(rs + "units").Value;
-               
+                attrWithDefWithConc = attrWithDef;
 
                 //Next 5 lines workaround for attributes that do not conform to schema
                 string restrictionAttr = "xs:string";
@@ -709,6 +718,7 @@ namespace ExcelQueryServiceAddIn
                     rightCell.Value2 = preferredName;
                     rightCell.Font.Bold = true;
                     rightCell.Font.Underline = false;
+                    rightCell.Locked = true;
                 }
 
             }
@@ -933,7 +943,8 @@ namespace ExcelQueryServiceAddIn
             {
                 //Refuse to add?  Do you have to remove first?
             }
-
+            
+            string attr = createAttrs(selectedNode, name);
 
             //Create concept list if not exists
 
@@ -948,14 +959,14 @@ namespace ExcelQueryServiceAddIn
             {
                 for (int i = 3; c.Value2 != null; i++)
                 {
-                    c = (Excel.Range)ocList.Cells[i, 1];
+                    c = (Excel.Range)propList.Cells[i, 1];
 
                 }
 
                 c.Value2 = id;
                 c.Next.Value2 = preferredName;
                 c.Next.Next.Value2 = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
-                //c.Next.Next.Next.Value2 = attr.Trim().Replace(",", "\n\n").Replace("&#44;", ", ").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
+                c.Next.Next.Next.Value2 = attr.Trim().Replace(",", "\n\n").Replace("&#44;", ", ").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
 
                 //Cells mapped counter
                 c.Next.Next.Next.Next.Value2 = 1;
@@ -1040,7 +1051,7 @@ namespace ExcelQueryServiceAddIn
             }
             else
             {
-                selected.Value2 = label + ";" + selected.Value2;
+                label += ";" + selected.Value2;
             }
 
             //Check for existing concept (May need to remove this to allow duplicates, so that two way link can be established)
@@ -1125,6 +1136,105 @@ namespace ExcelQueryServiceAddIn
             selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
             selected.Interior.TintAndShade = 0.6;
 
+        }
+
+        protected string createAttrs(XElement selectedNode, string name)
+        {
+            string ret = "";
+
+            if (name.Equals("vd")) 
+            {
+                if (selectedNode.Element(rs + "enumerated") != null)
+                {
+
+                    var validValues = from vv in selectedNode.Element(rs + "enumerated").Elements(rs + "valid-value")
+                                      select new
+                                      {
+                                          Code = vv.Element(rs + "code").Value,
+                                          Meaning = vv.Element(rs + "meaning").Value,
+                                          ConceptCollection = vv.Elements(rs + "conceptCollection").Any() ?
+
+                                          from cc in vv.Element(rs + "conceptCollection").Elements(rs + "evsconcept")
+                                          orderby cc.Element(rs + "displayOrder").Value
+                                          select new
+                                          {
+                                              DisplayOrder = cc.Element(rs + "displayOrder").Value,
+                                              ConceptName = cc.Element(rs + "name").Value
+                                          }
+                                          : null
+
+                                      };
+                    foreach (var vv in validValues)
+                    {
+                        string evscode = "";
+
+                        if (vv.ConceptCollection != null)
+                        {
+                            foreach (var concept in vv.ConceptCollection)
+                                evscode += ":" + concept.ConceptName;
+
+                            evscode = evscode.Substring(1);
+                            evscode = " | " + evscode;
+                        }
+
+                        ret += vv.Code + " : (" + vv.Meaning.Replace(",", "&#44;").Replace("&lt;", "<").Replace("&gt;", ">") + evscode + "),";
+                    }
+
+                    if (ret != null && ret.Contains(","))
+                        ret.Remove(ret.LastIndexOf(','));
+
+                }
+                else
+                {
+                    ret = "data-type: " + selectedNode.Element(rs + "non-enumerated").Element(rs + "data-type").Value + "\nUnits: " + selectedNode.Element(rs + "non-enumerated").Element(rs + "units").Value;
+                }
+            } else if (name.Equals("dec")) 
+            {
+                if (selectedNode.Element(rs + "object-class") != null)
+                {
+                    XElement namesNode = selectedNode.Element(rs + "object-class").Element(rs + "names");
+                    string id = namesNode.Element(rs + "id").Value;
+                    string prefName = namesNode.Element(rs + "preferred").Value;
+                    var onames = from nm in namesNode.Elements(rs + "all-names")
+                                 select new
+                                 {
+                                     Name = nm.Element(rs + "name")
+
+                                 };
+                    ret = "Object Class \n";
+                    ret += "ID: " + id + "\n";
+                    ret += "Preferred Name: " + prefName + "\n";
+
+                    foreach (var nme in onames)
+                    {
+                        if (!((string)nme.Name).Equals((string)prefName))
+                            ret += "Alt. Name: " + nme.Name.Value + "\n";
+                    }
+
+                    ret += "\n";
+                    namesNode = selectedNode.Element(rs + "property").Element(rs + "names");
+                    id = namesNode.Element(rs + "id").Value;
+                    prefName = namesNode.Element(rs + "preferred").Value;
+                    var pnames = from nm in namesNode.Elements(rs + "all-names")
+                                 select new
+                                 {
+                                     Name = nm.Element(rs + "name")
+
+                                 };
+                    ret += "Property \n";
+                    ret += "ID: " + id + "\n";
+                    ret += "Preferred Name: " + prefName + "\n";
+                    foreach (var nme in pnames)
+                    {
+                        if (!((string)nme.Name).Equals((string)prefName))
+                            ret += "Alt. Name: " + nme.Name.Value + "\n";
+                    }
+                }
+
+            } else { }
+
+
+            return ret;
         }
 
         protected string getSelectedRangeAddress(Excel.Range r)
@@ -1273,6 +1383,14 @@ namespace ExcelQueryServiceAddIn
             column.Next.Next.EntireColumn.WrapText = true;
             column.Next.Next.EntireColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignJustify;
 
+            //Properties/Values
+            column.Next.Next.Next.Value2 = "Properties/Values";
+            column.Next.Next.Next.Font.Bold = true;
+            column.Next.Next.Next.Font.Background = Excel.XlBackground.xlBackgroundOpaque;
+            column.Next.Next.Next.EntireColumn.ColumnWidth = 50;
+            column.Next.Next.Next.EntireColumn.VerticalAlignment = Excel.XlVAlign.xlVAlignTop;
+            column.Next.Next.Next.EntireColumn.WrapText = true;
+            column.Next.Next.Next.EntireColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignJustify;
             sheet.Protect(dummyPass, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
 
 
