@@ -238,8 +238,8 @@ namespace QueryServiceControl
                 }
                 //Workaround for SDK caused caDSR API bug.
                 query.numResults = pageSize + 1;
-                if (currentPage > 0)
-                    query.numResults = 200;
+                if (currentPage > 0) 
+                    query.numResults = 200+(pageSize*currentPage)+1;
 
                 string response = qsm.queryString(query);
 
@@ -249,7 +249,7 @@ namespace QueryServiceControl
                 nsmanager = new XmlNamespaceManager(lastResult.NameTable);
                 nsmanager.AddNamespace("rs", "http://cancergrid.org/schema/result-set");
 
-                int rstSize = 6;
+                int rstSize = 8;
                 string[] resultSetTypes = new string[rstSize];
                 resultSetTypes[0] = "data-element";
                 resultSetTypes[1] = "concept";
@@ -257,6 +257,8 @@ namespace QueryServiceControl
                 resultSetTypes[3] = "property";
                 resultSetTypes[4] = "conceptual-domain";
                 resultSetTypes[5] = "representation-term";
+                resultSetTypes[6] = "values";
+                resultSetTypes[7] = "data-element-concept";
 
                 XmlNodeList nodeList = null;
                 for (int i = 0; i < rstSize; i++)
@@ -287,7 +289,7 @@ namespace QueryServiceControl
                     btnBack.Enabled = true;
                 }
 
-                if (nodeList.Count >= pageSize)
+                if (nodeList.Count > pageSize)
                 {
                     btnForward.Enabled = true;
                 }
@@ -515,6 +517,8 @@ namespace QueryServiceControl
                 XmlNode vdNode = null;
                 XmlNode wfNode = null;
                 XmlNode ccNode = null;
+                XmlNode ocNode = null;
+                XmlNode propNode = null;
                 
                 if (sender.Equals(lstClassificationQueryResult))
                 {
@@ -528,8 +532,12 @@ namespace QueryServiceControl
                     propsNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:properties", nsmanager);
                     defNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:definition", nsmanager);
                     ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
-                    if (ccNode == null || ccNode.InnerXml.Length == 0)
-                        ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:property[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);              
+                    ocNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:object-class", nsmanager);
+                    propNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:property", nsmanager); if (ccNode == null || ccNode.InnerXml.Length == 0)
+                        ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:property[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
+                    if (vdNode == null || vdNode.InnerXml.Length == 0)
+                        vdNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:values[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']", nsmanager);
+                    
                 }
                 else
                 {
@@ -584,7 +592,7 @@ namespace QueryServiceControl
 
                         if (x.Element(rs + "enumerated").Element(rs + "valid-value").Element(rs + "conceptCollection") != null)
                         {
-                            var enumeratedValues = from ev in x.Element(rs + "enumerated").Elements(rs + "valid-value") 
+                            var enumeratedValues = from ev in x.Element(rs + "enumerated").Elements(rs + "valid-value")
                                                    select new
                                                    {
                                                        Code = ev.Element(rs + "code").Value,
@@ -598,19 +606,20 @@ namespace QueryServiceControl
                                 string conceptConcat = "";
                                 if (validValue.ConceptCollection != null)
                                 {
-                                    var conColl = from cc in validValue.ConceptCollection.Elements(rs+"evsconcept")
-                                                        orderby cc.Element(rs+"displayOrder").Value descending
-                                                        select new {
-                                                            DisplayOrder = cc.Element(rs+"displayOrder").Value,
-                                                            ConceptName = cc.Element(rs+"name").Value
-                                                        };
+                                    var conColl = from cc in validValue.ConceptCollection.Elements(rs + "evsconcept")
+                                                  orderby cc.Element(rs + "displayOrder").Value descending
+                                                  select new
+                                                  {
+                                                      DisplayOrder = cc.Element(rs + "displayOrder").Value,
+                                                      ConceptName = cc.Element(rs + "name").Value
+                                                  };
                                     foreach (var concept in conColl)
                                     {
                                         conceptConcat += ":" + concept.ConceptName;
                                     }
                                     conceptConcat = conceptConcat.Substring(1);
                                 }
-                                
+
                                 values += "<tr><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + validValue.Code + "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + validValue.Meaning + "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + conceptConcat + "</td></tr>";
                             }
                             values += "</table>";
@@ -641,7 +650,7 @@ namespace QueryServiceControl
                         values += "<tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">units</th><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + x.Element(rs + "non-enumerated").Element(rs + "units").Value + "</td></tr>";
                         values += "</table>";
                     }
-                    
+
 
                     if (sender.Equals(lstClassificationQueryResult))
                     {
@@ -650,13 +659,13 @@ namespace QueryServiceControl
                     else if (sender.Equals(lstResults))
                     {
                         wbDetailsPropsValues.DocumentText = values;
-                    }                    
+                    }
                 }
                 else if (ccNode != null)
                 {
                     XElement x = XElement.Parse(ccNode.OuterXml);
                     values = "<table style=\"width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Position</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Concept</th></tr>";
-                    
+
                     var conceptCollection = from cc in x.Elements(rs + "evsconcept")
                                             orderby cc.Element(rs + "displayOrder").Value descending
                                             select new
@@ -675,7 +684,7 @@ namespace QueryServiceControl
                     }
 
                     values += "</table>";
-                    wbDetailsPropsValues.DocumentText = values;    
+                    wbDetailsPropsValues.DocumentText = values;
                 }
                 else if (propsNode != null)
                 {
@@ -699,13 +708,58 @@ namespace QueryServiceControl
                         wbDetailsPropsValues.DocumentText = props;
                     }
                 }
+                else if (ocNode != null)
+                {
+
+                    props = "<table style=\"border: 1px solid #ddd;border-collapse: collapse;\">";
+                    props += "<tr><th colspan=2 style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Object Class</th></tr>";
+                    props += formatBasicInfo(ocNode, rs);
+
+                    props += "<tr><th colspan=2 style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Property</th></tr>";
+
+                    props += formatBasicInfo(propNode, rs);
+                    props += "</table>";
+
+                    if (sender.Equals(lstResults))
+                    {
+                        wbDetailsPropsValues.DocumentText = props;
+                    }
+                }
+                else wbDetailsPropsValues.DocumentText = "No information retrieved";
+                
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
         }
-  
+
+        private string formatBasicInfo(XmlNode node, XNamespace rs)
+        {
+            string ret = "";
+            XElement x = XElement.Parse(node.OuterXml);
+            XElement namesNode = x.Element(rs + "names");
+
+            string id = namesNode.Element(rs + "id").Value;
+            string prefName = namesNode.Element(rs + "preferred").Value;
+            var anames = from nm in namesNode.Elements(rs + "all-names")
+                        select new
+                        {
+                            Name = nm.Element(rs + "name")
+
+                        };
+            string td = "<td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">";
+            ret += "<tr>"+td+"ID:</td>" + td + id + "</td></tr>";
+            ret += "<tr>"+td+"Preferred Name:</td>" + td + prefName + "</td></tr>";
+            foreach (var nme in anames)
+            {
+                if (!((string)nme.Name).Equals((string)prefName))
+                    ret += "<tr>"+td+"Alt. Name:</td>" + td +nme.Name + "</td></tr>"; 
+            }
+        
+            return ret;
+        }
         private void btnForwardCLS_Click(object sender, EventArgs e)
         {
             currentPageCLS++;
