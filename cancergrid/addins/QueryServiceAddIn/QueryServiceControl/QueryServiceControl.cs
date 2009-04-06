@@ -313,26 +313,49 @@ namespace QueryServiceControl
             target.Items.Clear();
             foreach (XmlNode node in results)
             {
-                string id = node.SelectSingleNode("rs:names/rs:id", nsmanager).InnerXml;
-                string name = node.SelectSingleNode("rs:names/rs:preferred", nsmanager).InnerXml;
 
-                if (node.SelectSingleNode("rs:workflow-status", nsmanager) != null)
+
+                bool complex = false;
+                bool testContext = false;
+                string context = "";
+                if (node.SelectSingleNode("rs:context", nsmanager) != null)
                 {
-                    string workflow = node.SelectSingleNode("rs:workflow-status", nsmanager).InnerXml;
-                    string registration = node.SelectSingleNode("rs:registration-status", nsmanager).InnerXml;
-
-                    target.Items.Add(new QueryListItem(id, name + "  (" + registration + ":" + workflow + ")"));
+                    context = node.SelectSingleNode("rs:context", nsmanager).InnerXml;
+                    if (context.ToLower().Equals("test") || context.ToLower().Equals("training"))
+                        testContext = true;
                 }
-                else
+                if (!testContext)
                 {
+
+                    string id = node.SelectSingleNode("rs:names/rs:id", nsmanager).InnerXml;
+                    string name = node.SelectSingleNode("rs:names/rs:preferred", nsmanager).InnerXml;
+
+                    if (node.SelectSingleNode("rs:workflow-status", nsmanager) != null)
+                    {
+                        complex = true;
+                        string workflow = node.SelectSingleNode("rs:workflow-status", nsmanager).InnerXml;
+                        string registration = node.SelectSingleNode("rs:registration-status", nsmanager).InnerXml;
+                        name += "  (" + registration + ":" + workflow;
+                    }
+
+                    if (context.Length > 0)
+                    {
+                        complex = true;
+                        name += ":" + context;
+                    }
+
+                    if (complex)
+                        name += ")";
+
                     target.Items.Add(new QueryListItem(id, name));
-                
                 }
             }
+
             if (target.Items.Count == pageSize + 1)
             {
                 target.Items.RemoveAt(pageSize);
             }
+
             target.DisplayMember = "NAME";
             target.ValueMember = "ID";          
         }
