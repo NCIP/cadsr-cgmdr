@@ -40,6 +40,9 @@
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
 			</registration-status>
+			<context>
+				<xsl:value-of select="context/Context/name"/>
+			</context>
 			<xsl:apply-templates select="valueDomain"/>
 		</data-element>
 	</xsl:template>
@@ -71,6 +74,9 @@
 			<workflow-status>
 				<xsl:value-of select="workflowStatusName"/>
 			</workflow-status>
+			<context>
+				<xsl:value-of select="context/Context/name"/>
+			</context>
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
 			</registration-status>
@@ -110,6 +116,9 @@
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
 			</registration-status>
+			<context>
+				<xsl:value-of select="context/Context/name"/>
+			</context>
 			<enumerated>
 				<xsl:apply-templates select="valueDomainPermissibleValueCollection/ValueDomainPermissibleValue/permissibleValue/PermissibleValue"/>
 			</enumerated>
@@ -156,6 +165,9 @@
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
 			</registration-status>
+			<context>
+				<xsl:value-of select="context/Context/name"/>
+			</context>
 			<xsl:apply-templates select="conceptDerivationRule/ConceptDerivationRule/componentConceptCollection"/>
 		</object-class>
 	</xsl:template>
@@ -187,6 +199,9 @@
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
 			</registration-status>
+			<context>
+				<xsl:value-of select="context/Context/name"/>
+			</context>
 			<xsl:apply-templates select="conceptDerivationRule/ConceptDerivationRule/componentConceptCollection"/>
 		</property>
 	</xsl:template>
@@ -218,6 +233,9 @@
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
 			</registration-status>
+			<context>
+				<xsl:value-of select="context/Context/name"/>
+			</context>
 			<xsl:apply-templates select="conceptDerivationRule/ConceptDerivationRule/componentConceptCollection"/>
 		</conceptual-domain>
 	</xsl:template>

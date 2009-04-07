@@ -7,7 +7,12 @@
 			<xs:choice minOccurs="0">
 				<xs:element ref="concept" maxOccurs="unbounded"/>
 				<xs:element ref="data-element" maxOccurs="unbounded"/>
+				<xs:element ref="values" maxOccurs="unbounded"/>
 				<xs:element ref="object-class" maxOccurs="unbounded"/>
+				<xs:element ref="conceptual-domain" maxOccurs="unbounded"/>
+				<xs:element ref="data-element-concept" maxOccurs="unbounded"/>
+				<xs:element ref="representation-term" maxOccurs="unbounded"/>
+				<xs:element ref="property" maxOccurs="unbounded"/>
 				<xs:element ref="node"/>
 				<xs:element ref="classification_scheme" maxOccurs="unbounded"/>
 			</xs:choice>
@@ -19,6 +24,7 @@
 			<xs:element ref="names"/>
 			<xs:element name="definition" type="xs:string"/>
 			<xs:element name="workflow-status" type="xs:string" minOccurs="0"/>
+			<xs:element name="context" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:element name="names" type="names"/>
