@@ -366,7 +366,7 @@ namespace QueryServiceControl
                         }
                         name += " " + ver;
 
-                        if (node.SelectSingleNode("rs:registration-status", nsmanager).InnerXml != null)
+                        if (node.SelectSingleNode("rs:registration-status", nsmanager) != null)
                         {
                             complex = true;
                             registration = node.SelectSingleNode("rs:registration-status", nsmanager).InnerXml;

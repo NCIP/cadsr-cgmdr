@@ -1051,7 +1051,7 @@ namespace ExcelQueryServiceAddIn
             }
             else
             {
-                label += ";" + selected.Value2;
+                selected.Value2 += ";" + label;
             }
 
             //Check for existing concept (May need to remove this to allow duplicates, so that two way link can be established)
