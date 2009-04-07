@@ -314,10 +314,14 @@ namespace QueryServiceControl
             foreach (XmlNode node in results)
             {
 
-
                 bool complex = false;
                 bool testContext = false;
+                bool retiredWorkflow = false;
+
                 string context = "";
+                string workflow = "";
+                string registration = "";
+
                 if (node.SelectSingleNode("rs:context", nsmanager) != null)
                 {
                     context = node.SelectSingleNode("rs:context", nsmanager).InnerXml;
@@ -326,28 +330,66 @@ namespace QueryServiceControl
                 }
                 if (!testContext)
                 {
+                    if (node.SelectSingleNode("rs:workflow-status", nsmanager) != null) {
+                        workflow = node.SelectSingleNode("rs:workflow-status", nsmanager).InnerXml;
+                        string wku = workflow.ToUpper();
+                        string[] restrictedW = new string[7];
+                        restrictedW[0]="CMTE APPROVED";
+                        restrictedW[1]="CMTE SUBMTD";
+                        restrictedW[2]="CMTE SUBMTD USED";
+                        restrictedW[3]="RETIRED ARCHIVED";
+                        restrictedW[4]="RETIRED PHASED OUT";
+                        restrictedW[5]="RETIRED WITHDRAWN";
+                        restrictedW[6]="RETIRED DELETED";
 
-                    string id = node.SelectSingleNode("rs:names/rs:id", nsmanager).InnerXml;
-                    string name = node.SelectSingleNode("rs:names/rs:preferred", nsmanager).InnerXml;
+                        for (int i = 0; i < 7; i++)
+                        {
+                            if (workflow.ToUpper().Contains(restrictedW[i]))
+                            {
+                                retiredWorkflow = true;
+                                break;
+                            }
+                        }
 
-                    if (node.SelectSingleNode("rs:workflow-status", nsmanager) != null)
-                    {
-                        complex = true;
-                        string workflow = node.SelectSingleNode("rs:workflow-status", nsmanager).InnerXml;
-                        string registration = node.SelectSingleNode("rs:registration-status", nsmanager).InnerXml;
-                        name += "  (" + registration + ":" + workflow;
                     }
-
-                    if (context.Length > 0)
+                    if (!retiredWorkflow)
                     {
-                        complex = true;
-                        name += ":" + context;
+
+                        string id = node.SelectSingleNode("rs:names/rs:id", nsmanager).InnerXml;
+                        string name = node.SelectSingleNode("rs:names/rs:preferred", nsmanager).InnerXml;
+                        string ver = "";
+                        if (id.Contains("-CADSR-"))
+                        {
+                            string[] idarr = id.Split('-');
+                            //id = idarr[idarr.Length - 2] + " v." + idarr[idarr.Length - 1];
+                            ver = "v." + idarr[idarr.Length - 1];
+                        }
+                        name += " " + ver;
+
+                        if (node.SelectSingleNode("rs:registration-status", nsmanager).InnerXml != null)
+                        {
+                            complex = true;
+                            registration = node.SelectSingleNode("rs:registration-status", nsmanager).InnerXml;
+                            name += "  (" + registration;
+                        }
+                        
+                        if (workflow.Length > 0)
+                        {
+                            complex = true;
+                            name += ":" + workflow;
+                        }
+
+                        if (context.Length > 0)
+                        {
+                            complex = true;
+                            name += ":" + context;
+                        }
+
+                        if (complex)
+                            name += ")";
+
+                        target.Items.Add(new QueryListItem(id, name));
                     }
-
-                    if (complex)
-                        name += ")";
-
-                    target.Items.Add(new QueryListItem(id, name));
                 }
             }
 
@@ -534,11 +576,11 @@ namespace QueryServiceControl
                 string definition = null;
                 string values = null;
                 string props = null;
-                string workflow = null;
+                string other = null;
                 XmlNode defNode = null;
                 XmlNode propsNode = null;
                 XmlNode vdNode = null;
-                XmlNode wfNode = null;
+
                 XmlNode ccNode = null;
                 XmlNode ocNode = null;
                 XmlNode propNode = null;
@@ -550,7 +592,6 @@ namespace QueryServiceControl
                 }
                 else if (sender.Equals(lstResults))
                 {
-                    wfNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:workflow-status", nsmanager);
                     vdNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:values", nsmanager);
                     propsNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:properties", nsmanager);
                     defNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:definition", nsmanager);
@@ -585,17 +626,10 @@ namespace QueryServiceControl
                     }
                 }
 
-
-                if (wfNode == null || wfNode.InnerXml.Length == 0)
-                {
-                    workflow = "<div style=\"font-size: 14px; text-aligh: justify;\">(No workflow status supplied)</div>";
-                }
-                else
-                {
-                    workflow = "<div style=\"font-size: 14px; text-aligh: justify;\">Workflow Status: " + wfNode.InnerXml + "</div>";
-                }
+                other = buildOtherContent();
 
 
+             
                 if (sender.Equals(lstClassificationQueryResult))
                 {
                     wbClassificationQueryResultDef.DocumentText = definition;
@@ -603,7 +637,7 @@ namespace QueryServiceControl
                 else if (sender.Equals(lstResults))
                 {
                     wbDetailsDef.DocumentText = definition;
-                    wbDetailsOther.DocumentText = workflow;
+                    wbDetailsOther.DocumentText = other;
                 }
 
                 XNamespace rs = "http://cancergrid.org/schema/result-set";
@@ -731,7 +765,7 @@ namespace QueryServiceControl
                         wbDetailsPropsValues.DocumentText = props;
                     }
                 }
-                else if (ocNode != null)
+                else if (ocNode != null || propNode != null)
                 {
 
                     props = "<table style=\"border: 1px solid #ddd;border-collapse: collapse;\">";
@@ -758,29 +792,78 @@ namespace QueryServiceControl
             }
         }
 
+        private string buildOtherContent()
+        {
+            XmlNode wfNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:workflow-status", nsmanager);
+            XmlNode ctxNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:context", nsmanager);
+            XmlNode regNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:registration-status", nsmanager);
+
+            string other = "";
+
+            if (wfNode == null || wfNode.InnerXml.Length == 0)
+            {
+                other = "<div style=\"font-size: 14px; text-aligh: justify;\">(No workflow status supplied)</div>";
+            }
+            else
+            {
+                other = "<div style=\"font-size: 14px; text-aligh: justify;\">Workflow Status: " + wfNode.InnerXml + "</div>";
+            }
+
+            if (regNode == null || regNode.InnerXml.Length == 0 || regNode.InnerXml.Length == 1)
+            {
+                other += "<p><div style=\"font-size: 14px; text-aligh: justify;\">(No registration status supplied)</div>";
+            }
+            else
+            {
+                other += "<p><div style=\"font-size: 14px; text-aligh: justify;\">Registration Status: " + regNode.InnerXml + "</div>";
+            }
+
+            if (ctxNode == null || ctxNode.InnerXml.Length == 0)
+            {
+                other += "<p><div style=\"font-size: 14px; text-aligh: justify;\">(No context supplied)</div>";
+            }
+            else
+            {
+                other += "<p><div style=\"font-size: 14px; text-aligh: justify;\">Context: " + ctxNode.InnerXml + "</div>";
+            }
+
+            return other;
+        }
+
         private string formatBasicInfo(XmlNode node, XNamespace rs)
         {
             string ret = "";
-            XElement x = XElement.Parse(node.OuterXml);
-            XElement namesNode = x.Element(rs + "names");
-
-            string id = namesNode.Element(rs + "id").Value;
-            string prefName = namesNode.Element(rs + "preferred").Value;
-            var anames = from nm in namesNode.Elements(rs + "all-names")
-                        select new
-                        {
-                            Name = nm.Element(rs + "name")
-
-                        };
-            string td = "<td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">";
-            ret += "<tr>"+td+"ID:</td>" + td + id + "</td></tr>";
-            ret += "<tr>"+td+"Preferred Name:</td>" + td + prefName + "</td></tr>";
-            foreach (var nme in anames)
+            if (node != null)
             {
-                if (!((string)nme.Name).Equals((string)prefName))
-                    ret += "<tr>"+td+"Alt. Name:</td>" + td +nme.Name + "</td></tr>"; 
+                XElement x = XElement.Parse(node.OuterXml);
+                XElement namesNode = x.Element(rs + "names");
+
+                string id = namesNode.Element(rs + "id").Value;
+                string prefName = namesNode.Element(rs + "preferred").Value;
+                var anames = from nm in namesNode.Elements(rs + "all-names")
+                             select new
+                             {
+                                 Name = nm.Element(rs + "name")
+
+                             };
+                string td = "<td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">";
+                ret += "<tr>" + td + "ID:</td>" + td + id + "</td></tr>";
+                ret += "<tr>" + td + "Preferred Name:</td>" + td + prefName + "</td></tr>";
+                foreach (var nme in anames)
+                {
+                    if (!((string)nme.Name).Equals((string)prefName))
+                        ret += "<tr>" + td + "Alt. Name:</td>" + td + nme.Name + "</td></tr>";
+                }
             }
-        
+            else
+            {
+                string td = "<td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">";
+                ret += "<tr>" + td + "ID:</td>" + td + "(Not supplied)" + "</td></tr>";
+                ret += "<tr>" + td + "Preferred Name:</td>" + td + "(Not supplied)" + "</td></tr>";
+                ret += "<tr>" + td + "Alt. Name:</td>" + td + "(Not supplied)" + "</td></tr>";
+                
+            }
+
             return ret;
         }
         private void btnForwardCLS_Click(object sender, EventArgs e)
