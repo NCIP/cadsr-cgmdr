@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<project name="cgMDR-dist" default="import" basedir="..">
+    <description>Create cgMDR distribution</description>
+    <import file="../build.xml"/>
+
+    <!-- setup class path -->
+    <path id="classpath.core">
+        <fileset dir="${lib.core}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${lib.optional}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${lib.endorsed}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${lib.cocoon}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${lib.user}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${lib.extensions}">
+            <include name="*.jar"/>
+        </fileset>
+
+        <fileset dir="extensions">
+            <include name="**/lib/*.jar"/>
+        </fileset>
+        <fileset dir="${tools.ant}/lib">
+            <include name="*.jar"/>
+        </fileset>
+
+        <pathelement path="exist.jar"/>
+        <pathelement path="exist-optional.jar"/>
+
+        <pathelement path="start.jar"/>
+        <pathelement path="${java.class.path}"/>
+    </path>
+
+    <typedef resource="org/exist/ant/antlib.xml" uri="http://exist-db.org/ant">
+        <classpath refid="classpath.core"/>
+    </typedef>
+
+    <condition property="exists">  
+        <xdb:exist xmlns:xdb="http://exist-db.org/ant"  
+            uri="xmldb:exist://localhost:8080/exist/xmlrpc/db/mdr/data/terminology"/>  
+    </condition> 
+  
+    
+    <target name="clean" if="exists">
+    	<xdb:remove xmlns:xdb="http://exist-db.org/ant"  
+                uri="xmldb:exist://localhost:8080/exist/xmlrpc/db/mdr/data" 
+                initdb="true"
+                user="admin" password="cancergrid" collection="terminology"/>
+     </target>
+  
+    <target name="import" depends="clean">
+  	<xdb:store xmlns:xdb="http://exist-db.org/ant"
+            uri="xmldb:exist://localhost:8080/exist/xmlrpc/db/mdr/data/terminology" 
+            initdb="true"
+            user="admin" password="cancergrid"
+            createcollection="true" createsubcollections="true">
+            <fileset dir="nmdp/">
+            	<include name="*.rdf"/>
+            </fileset>
+        </xdb:store>              
+        
+    </target>  
+</project>
