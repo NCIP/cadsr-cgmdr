@@ -771,7 +771,7 @@ namespace ExcelQueryServiceAddIn
                 string prim = concepts[concepts.Length - 1];
                 string quals = "";
                 for (int i = 0; i < concepts.Length - 1; i++)
-                    quals += concepts[i] + ",";
+                    quals += concepts[i] + ";";
 
                 if (quals.Length > 0)
                     quals = quals.Substring(0, quals.Length - 1);
