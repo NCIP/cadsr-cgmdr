@@ -74,7 +74,7 @@ namespace ExcelQueryServiceAddIn
             elements[0] = "data-element";
             elements[1] = "object-class";
             elements[2] = "concept";
-            elements[3] = "property";
+            elements[3] = "property-expanded";
             elements[4] = "conceptual-domain";
             elements[5] = "representation-term";
             elements[6] = "data-element-concept";
@@ -95,25 +95,25 @@ namespace ExcelQueryServiceAddIn
                             handleCDE(selectedNode, annotate);
                             break;
                         case "object-class":
-                            handleOC(selectedNode);
+                            handleCommon(selectedNode, "oc", annotate);
                             break;
-                        case "property":
-                            handleProp(selectedNode);
+                        case "property-expanded":
+                            handleCommon(selectedNode, "prop", annotate);
                             break;
                         case "concept":
                             handleConcept(selectedNode);
                             break;
                         case "conceptual-domain":
-                            handleCommon(selectedNode, "cd");
+                            handleCommon(selectedNode, "cd", annotate);
                             break;
                         case "representation-term":
-                            handleCommon(selectedNode, "rt");
+                            handleCommon(selectedNode, "rt", annotate);
                             break;
                         case "values":
-                            handleCommon(selectedNode, "vd");
+                            handleCommon(selectedNode, "vd", annotate);
                             break;
                         case "data-element-concept":
-                            handleCommon(selectedNode, "dec");
+                            handleCommon(selectedNode, "dec", annotate);
                             break;
 
                     }
@@ -725,15 +725,15 @@ namespace ExcelQueryServiceAddIn
         }
 
         /// <summary>
-        /// Handles insertion of object class element into worksheet.
+        /// Handles insertion of common class elements into worksheet.
         /// 
         /// TODO: Refactor code
         /// </summary>
-        /// <param name="selectedNode">Object Class element to use</param>
-        protected void handleOC(XElement selectedNode)
+        /// <param name="selectedNode">Common Class element element to use</param>
+        protected void handleCommon(XElement selectedNode, string name, bool annotate)
         {
             string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
-
+            string fullId = selectedNode.Element(rs + "names").Element(rs + "id").Value;
             //Removing the institution identifying prefix from CADSR elements on client request
             if (id.Contains("-CADSR-"))
             {
@@ -757,194 +757,46 @@ namespace ExcelQueryServiceAddIn
                     definition = e.Element("def-definition").Value + "\n(Source: " + e.Element("def-source").Value + ")";
                 }
             }
-
-            string label = preferredName;
-
-            //Get selected range
-            Excel.Range selected = (Excel.Range)application.Selection;
-            if (selected.Value2 == null || selected.Value2.ToString().Length == 0)
-            {
-                selected.Value2 = label;
-            }
-            else
-            {
-                //Refuse to add?  Do you have to remove first?
-            }
-
-
-            //Create concept list if not exists
-            if (!isOCListExists())
-            {
-                ocList = createOCList();
-            }
-
-            //Add new concept entry to concept_list
-            ocList.Unprotect(dummyPass);
-            Excel.Range c = (Excel.Range)ocList.Cells[2, 1];
-
-            Excel.Range found = ocList.Cells.Find(id, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
-            if (found == null) //if (existingIndex == 0)
-            {
-                for (int i = 3; c.Value2 != null; i++)
-                {
-                    c = (Excel.Range)ocList.Cells[i, 1];
-
-                }
-
-                c.Value2 = id;
-                //c.Hyperlinks.Add(c, "", id, Type.Missing, id);
-                c.Next.Value2 = preferredName;
-                c.Next.Next.Value2 = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
-                //c.Next.Next.Next.Value2 = attr.Trim().Replace(",", "\n\n").Replace("&#44;", ", ").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
-
-                //Cells mapped counter
-                c.Next.Next.Next.Next.Value2 = 1;
-            }
-            else
-            {
-                found.Next.Next.Next.Next.Value2 = 1 + Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString());
-            }
-
-            ocList.Protect(dummyPass, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
-
-            selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, label);
-
-            selected.Font.Bold = true;
-            selected.Font.Underline = false;
-            selected.Font.ColorIndex = 1;
-            selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
-            selected.Interior.TintAndShade = 0.9;
-
-        }
-
-
-        protected void handleProp(XElement selectedNode)
-        {
-            string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
-
-            //Removing the institution identifying prefix from CADSR elements on client request
-            if (id.Contains("-CADSR-"))
-            {
-                string[] idarr = id.Split('-');
-                id = idarr[idarr.Length - 2] + " v." + idarr[idarr.Length - 1];
-            }
-            
-            string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
-            string definition = selectedNode.Element(rs + "definition").Value;
-            if (definition == null || definition.Length == 0)
-            {
-                definition = "(No definition supplied)";
-            }
-            else
-            {
-                //Handle special caDSR/EVS format
-                definition = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("<![CDATA[", "").Replace("]]>", "");
-                if (definition.Contains("<def-source>"))
-                {
-                    XElement e = XElement.Parse("<def>" + definition + "</def>");
-                    definition = e.Element("def-definition").Value + "\n(Source: " + e.Element("def-source").Value + ")";
-                }
-            }
-
-            string label = id+ ":"+preferredName;
-
-            //Get selected range
-            Excel.Range selected = (Excel.Range)application.Selection;
-            if (selected.Value2 == null || selected.Value2.ToString().Length == 0)
-            {
-                selected.Value2 = label;
-            }
-            else
-            {
-                //Refuse to add?  Do you have to remove first?
-            }
-
-
-            //Create concept list if not exists
-
-            propList = useList(propList, "prop_list");
-
-            //Add new concept entry to concept_list
-            propList.Unprotect(dummyPass);
-            Excel.Range c = (Excel.Range)propList.Cells[2, 1];
-
-            Excel.Range found = propList.Cells.Find(id, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
-            if (found == null) //if (existingIndex == 0)
-            {
-                for (int i = 3; c.Value2 != null; i++)
-                {
-                    c = (Excel.Range)ocList.Cells[i, 1];
-
-                }
-
-                c.Value2 = id;
-                c.Next.Value2 = preferredName;
-                c.Next.Next.Value2 = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
-                //c.Next.Next.Next.Value2 = attr.Trim().Replace(",", "\n\n").Replace("&#44;", ", ").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
-
-                //Cells mapped counter
-                c.Next.Next.Next.Next.Value2 = 1;
-            }
-            else
-            {
-                found.Next.Next.Next.Next.Value2 = 1 + Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString());
-            }
-
-            propList.Protect(dummyPass, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
-
-            /* Remove hyperlinks for now until a suitable two way link method is found */
-            selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, label);
-
-            selected.Font.Bold = true;
-            selected.Font.Underline = false;
-            selected.Font.ColorIndex = 1;
-            selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
-            selected.Interior.TintAndShade = 0.2;
-
-        }
-
-        protected void handleCommon(XElement selectedNode, string name)
-        {
-            string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
-
-            //Removing the institution identifying prefix from CADSR elements on client request
-            if (id.Contains("-CADSR-"))
-            {
-                string[] idarr = id.Split('-');
-                id = idarr[idarr.Length - 2] + " v." + idarr[idarr.Length - 1];
-            }
-
-            string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
-            string definition = selectedNode.Element(rs + "definition").Value;
-            if (definition == null || definition.Length == 0)
-            {
-                definition = "(No definition supplied)";
-            }
-            else
-            {
-                //Handle special caDSR/EVS format
-                definition = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("<![CDATA[", "").Replace("]]>", "");
-                if (definition.Contains("<def-source>"))
-                {
-                    XElement e = XElement.Parse("<def>" + definition + "</def>");
-                    definition = e.Element("def-definition").Value + "\n(Source: " + e.Element("def-source").Value + ")";
-                }
-            }
-
-            string label = id + ":" + preferredName;
-
-            //Get selected range
-            Excel.Range selected = (Excel.Range)application.Selection;
-            if (selected.Value2 == null || selected.Value2.ToString().Length == 0)
-            {
-                selected.Value2 = label;
-            }
-            else
-            {
-                //Refuse to add?  Do you have to remove first?
-            }
-            
             string attr = createAttrs(selectedNode, name);
+            string label = id + ":" + preferredName;
+            string[] concepts = null;
+            Excel.Range selected = (Excel.Range)application.Selection;
+            string hLinkLabel = label;
+
+
+            if (annotate && (!name.Equals("vd") && !name.Equals("dec")))
+            {
+                concepts = extractConcepts(attr).Split(',');
+                Excel.Range leftCell = selected.get_Offset(0, -1);
+                string prim = concepts[concepts.Length - 1];
+                string quals = "";
+                for (int i = 0; i < concepts.Length - 1; i++)
+                    quals += concepts[i] + ",";
+
+                if (quals.Length > 0)
+                    quals = quals.Substring(0, quals.Length - 1);
+
+                if ((selected.Value2 == null || selected.Value2.ToString().Length == 0) && (((leftCell.Value2 == null || leftCell.Value2.ToString().Length == 0) || quals.Length == 0)))
+                {
+                    selected.Value2 = prim;
+                    hLinkLabel = prim;
+                    if (quals.Length > 0)
+                        leftCell.Value2 = quals;
+                }
+            }
+            else
+            {
+                //Get selected range
+
+                if (selected.Value2 == null || selected.Value2.ToString().Length == 0)
+                {
+                    selected.Value2 = label;
+                }
+                else
+                {
+                    //Refuse to add?  Do you have to remove first?
+                }
+            }
 
             //Create concept list if not exists
 
@@ -963,7 +815,7 @@ namespace ExcelQueryServiceAddIn
 
                 }
 
-                c.Value2 = id;
+                c.Value2 = fullId;
                 c.Next.Value2 = preferredName;
                 c.Next.Next.Value2 = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
                 c.Next.Next.Next.Value2 = attr.Trim().Replace(",", "\n\n").Replace("&#44;", ", ").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
@@ -979,7 +831,7 @@ namespace ExcelQueryServiceAddIn
             propList.Protect(dummyPass, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
 
             /* Remove hyperlinks for now until a suitable two way link method is found */
-            selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, label);
+            selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, hLinkLabel);
 
             selected.Font.Bold = true;
             selected.Font.Underline = false;
@@ -1231,29 +1083,49 @@ namespace ExcelQueryServiceAddIn
                     }
                 }
 
-            } else { }
+            } else if (name.Equals("oc") || name.Equals("prop") || name.Equals("rt"))
+            {
+                if (selectedNode.Element(rs + "conceptCollection") != null)
+                {
+                    
+
+                    var conceptCollection = from cc in selectedNode.Element(rs + "conceptCollection").Elements(rs + "evsconcept")
+                                            orderby cc.Element(rs + "displayOrder").Value descending
+                                            select new
+                                            {
+                                                DisplayOrder = cc.Element(rs + "displayOrder").Value,
+                                                ConceptName = cc.Element(rs + "name").Value,
+                                            };
+                    ret = "Concepts:\n";
+                    foreach (var concept in conceptCollection)
+                    {
+                        ret += ((Convert.ToInt16((string)concept.DisplayOrder)) == 0) ? "P: " : "Q: ";
+                        ret += concept.ConceptName + ",";
+
+                    }
+                    //Remove trailing comma
+                    if (ret != null && ret.Length > 0)
+                        ret = ret.Substring(0, ret.Length - 1);
+                }
+            }
 
 
             return ret;
         }
+
+        private string extractConcepts(string attr)
+        {
+            attr = attr.Substring(12);
+            attr = attr.Replace("P:", "").Replace("Q:", "");
+            return attr;
+        }
+
 
         protected string getSelectedRangeAddress(Excel.Range r)
         {
             return ((Excel.Worksheet)r.Parent).Name + "!" + r.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
         }
 
-        private bool isOCListExists()
-        {
-            try
-            {
-                ocList = (Excel.Worksheet)application.Worksheets.get_Item("oc_list");
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
 
         private bool isCDEListExists()
         {
@@ -1330,10 +1202,6 @@ namespace ExcelQueryServiceAddIn
         }
 
 
-        private Excel.Worksheet createOCList()
-        {
-            return useList(ocList, "oc_list");
-        }
 
         private Excel.Worksheet useList(Excel.Worksheet sheet, string name)
         {

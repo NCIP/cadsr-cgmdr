@@ -252,11 +252,11 @@ namespace QueryServiceControl
                 int rstSize = 8;
                 string[] resultSetTypes = new string[rstSize];
                 resultSetTypes[0] = "data-element";
-                resultSetTypes[1] = "concept";
-                resultSetTypes[2] = "object-class";
-                resultSetTypes[3] = "property";
-                resultSetTypes[4] = "conceptual-domain";
-                resultSetTypes[5] = "representation-term";
+                resultSetTypes[1] = "object-class";
+                resultSetTypes[2] = "property-expanded";
+                resultSetTypes[3] = "representation-term";
+                resultSetTypes[4] = "concept";
+                resultSetTypes[5] = "conceptual-domain";
                 resultSetTypes[6] = "values";
                 resultSetTypes[7] = "data-element-concept";
 
@@ -264,7 +264,7 @@ namespace QueryServiceControl
                 for (int i = 0; i < rstSize; i++)
                 {
                     nodeList = lastResult.DocumentElement.SelectNodes("/rs:result-set/rs:"+resultSetTypes[i], nsmanager);
-                    if (i > 0)
+                    if (i > 4)
                         btnAnnotate.Enabled = false;
                     else
                         btnAnnotate.Enabled = true;
@@ -597,8 +597,9 @@ namespace QueryServiceControl
                     defNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:definition", nsmanager);
                     ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
                     ocNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:object-class", nsmanager);
-                    propNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:property", nsmanager); if (ccNode == null || ccNode.InnerXml.Length == 0)
-                        ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:property[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
+                    propNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:property", nsmanager); 
+                    if (ccNode == null || ccNode.InnerXml.Length == 0)
+                        ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:property-expanded[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
                     if (vdNode == null || vdNode.InnerXml.Length == 0)
                         vdNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:values[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']", nsmanager);
                     
