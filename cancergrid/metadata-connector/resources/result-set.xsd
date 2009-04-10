@@ -157,7 +157,7 @@
 		<xs:complexContent>
 			<xs:extension base="common-info">
 				<xs:sequence>
-					<xs:element ref="values"/>
+					<xs:element ref="conceptCollection"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -167,7 +167,7 @@
 		<xs:complexContent>
 			<xs:extension base="common-info">
 				<xs:sequence>
-					<xs:element ref="values"/>
+					<xs:element ref="conceptCollection"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -178,7 +178,17 @@
 		<xs:complexContent>
 			<xs:extension base="common-info">
 				<xs:sequence>
-					<xs:element ref="values"/>
+					<xs:element ref="conceptCollection"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="property-expanded" type="property-expanded"/>
+	<xs:complexType name="property-expanded">
+		<xs:complexContent>
+			<xs:extension base="common-info">
+				<xs:sequence>
+					<xs:element ref="conceptCollection"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
