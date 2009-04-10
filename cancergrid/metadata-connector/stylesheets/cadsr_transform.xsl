@@ -174,7 +174,7 @@
 	
 	<xsl:template match="Property">
 		<!--<data-element xmlns="http://cancergrid.org/schema/result-set">-->
-		<property>
+		<property-expanded>
 			<names>
 				<id>US-NCICB-CACORE-CADSR-<xsl:value-of select="publicID"/>-<xsl:value-of select="version"/>
 				</id>
@@ -203,7 +203,7 @@
 				<xsl:value-of select="context/Context/name"/>
 			</context>
 			<xsl:apply-templates select="conceptDerivationRule/ConceptDerivationRule/componentConceptCollection"/>
-		</property>
+		</property-expanded>
 	</xsl:template>
 	
 	<xsl:template match="ConceptualDomain">
@@ -229,6 +229,7 @@
 			</definition>
 			<workflow-status>
 				<xsl:value-of select="workflowStatusName"/>
+				
 			</workflow-status>
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
