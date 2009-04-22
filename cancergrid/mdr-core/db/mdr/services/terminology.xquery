@@ -14,7 +14,7 @@ let $end := $start + $num
 
 let $concepts := 
     for $concept in collection('/db/mdr/data/terminology')/rdf:RDF/rdf:Description
-    where matches($concept/@skos:prefLabel, $term)
+    where matches(lower-case($concept/@skos:prefLabel), lower-case($term))
     order by $concept/@skos:prefLabel
     return
         $concept
