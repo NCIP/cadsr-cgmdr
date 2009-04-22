@@ -14,6 +14,7 @@ namespace ExcelQueryServiceAddIn
         private Microsoft.Office.Tools.CustomTaskPane myCustomTaskPane;
         private Office.CommandBarButton XMLUnmapButton;
         private Office.CommandBarButton CellUnmapButton;
+        private Office.CommandBarButton ClearInListButton;
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
@@ -25,13 +26,45 @@ namespace ExcelQueryServiceAddIn
             RemoveQueryServiceTaskPane();
         }
 
-        public void AddUnmapButtonMenuCommand() 
+        public void AddUnmapButtonMenuCommand()
         {
             Office._CommandBarButtonEvents_ClickEventHandler xButtonHandler =
                 new Office._CommandBarButtonEvents_ClickEventHandler(unmapXMLClick);
 
             Office._CommandBarButtonEvents_ClickEventHandler cButtonHandler =
                 new Office._CommandBarButtonEvents_ClickEventHandler(unmapHeaderClick);
+
+            Office._CommandBarButtonEvents_ClickEventHandler lButtonHandler =
+                new Office._CommandBarButtonEvents_ClickEventHandler(unmapListClick);
+               
+
+            //Uncomment and Loop to find correct command dropdown menu.
+            /*
+            Office.CommandBars commandBars;
+
+            commandBars = (Office.CommandBars)Application.CommandBars;
+
+            foreach (Office.CommandBar commandBar in commandBars)
+            {
+                string name = commandBar.Name;
+                string iName = commandBar.Name;
+                try
+                {
+                    Office.CommandBarButton testButton = (Office.CommandBarButton)Application.CommandBars[commandBar.Name].Controls.Add(Office.MsoControlType.msoControlButton, missing, missing, missing, true);
+                    testButton.Caption = commandBar.Name;
+                    testButton.Visible = true;
+                    //Uncomment when you want to clear the junk you just added.
+                    Application.CommandBars[commandBar.Name].Reset();
+                }
+                catch (Exception e)
+                { }
+            }
+            */
+
+            ClearInListButton = (Office.CommandBarButton)Application.CommandBars["List Range Popup"].Controls.Add(Office.MsoControlType.msoControlButton, missing, missing, missing, true);
+            ClearInListButton.Click += lButtonHandler;
+            ClearInListButton.Caption = "Remove Mapping";
+            ClearInListButton.Visible = true;
 
             XMLUnmapButton = (Office.CommandBarButton)Application.CommandBars["XML Range Popup"].Controls.Add(Office.MsoControlType.msoControlButton, missing, missing, missing, true);
             XMLUnmapButton.Click += xButtonHandler;
@@ -44,9 +77,107 @@ namespace ExcelQueryServiceAddIn
             CellUnmapButton.Visible = true;
         }
 
+        private void unmapListClick(Office.CommandBarButton button, ref bool Cancel)
+        {
+            Excel.Range selected = (Excel.Range)this.Application.Selection;
+
+            string cellXPath = selected.Cells.XPath.Value.ToLower();
+            string cellContent = selected.Cells.Text.ToString();
+            if (cellXPath.Contains("concept"))
+            {
+                Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
+                string[] codes = selected.Text.ToString().Split(';');
+
+                selected.Cells.Clear();
+                selected.Cells.ClearContents();
+                selected.Cells.ClearFormats();
+                selected.Cells.ClearNotes();
+
+                if (conceptList != null)
+                {
+                    conceptList.Unprotect("dummy_password");
+
+                    //Use Excel built-in Find feature to search for matched row
+                    foreach (String code in codes)
+                    {
+                        string c = code.Split(':')[0];
+                        Excel.Range found = conceptList.Cells.Find(c, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
+                        if (found != null)
+                        {
+                            int counter = Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString()) - 1;
+                            if (counter < 1)
+                            {
+                                found.EntireRow.Delete(Type.Missing); //Remove entire row
+                            }
+                            else
+                            {
+                                found.Next.Next.Next.Next.Value2 = counter;
+                            }
+                        }
+                    }
+
+                    conceptList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                }
+
+            }
+            else if (cellXPath.Contains("cdeid"))
+                removeId(selected, "cde");
+            else if (cellXPath.Contains("vdid"))
+                removeId(selected, "vd");
+            else if (cellXPath.Contains("decid"))
+                removeId(selected, "dec");
+            else
+                removeCommon(selected);
+
+            selected.Cells.Clear();
+            selected.Cells.ClearContents();
+            //selected.Cells.ClearFormats();
+            selected.Cells.ClearNotes();
+        }
+
+        private void removeCommon(Excel.Range selected)
+        { }
+
+        private void removeId(Excel.Range selected, string listType)
+        {
+            System.Collections.IEnumerator ir = selected.Hyperlinks.GetEnumerator();
+
+            string hAddy = "";
+            string hName = "";
+
+            while (ir.MoveNext())
+            {
+                Excel.Hyperlink hr = (Excel.Hyperlink)ir.Current;
+                hName = hr.Name;
+                hAddy = hr.SubAddress;
+            }
+
+            string selectedRangeString = ((Excel.Worksheet)selected.Parent).Name + "!" + selected.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
+            Excel.Worksheet list = (Excel.Worksheet)this.Application.Sheets[listType+"_list"];
+            Excel.Range details = list.get_Range(hAddy, Type.Missing);
+
+            //Excel.Range c = (Excel.Range)list.Cells[2, 1];
+            Excel.Range c = details;
+            for (int i = details.Cells.Row; i < 10000; i++)
+            {
+                c = (Excel.Range)list.Cells[i, 1];
+                string text = c.Text.ToString();
+                if (text.Contains(hName))
+                    break;
+            }
+
+            list.Unprotect("dummy_password");
+            c.Clear();
+            c.Next.Clear();
+            c.Next.Next.Clear();
+            c.Next.Next.Next.Clear();
+            list.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+
+        }
+
         private void unmapXMLClick(Office.CommandBarButton button, ref bool Cancel)
         {
-            Excel.Range selected = (Excel.Range)this.Application.Selection;           
+            Excel.Range selected = (Excel.Range)this.Application.Selection;
             selected.Cells.Clear();
             selected.Cells.ClearContents();
             selected.Cells.ClearFormats();
@@ -77,14 +208,14 @@ namespace ExcelQueryServiceAddIn
         {
             Excel.Range selected = (Excel.Range)this.Application.Selection;
 
+            Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
+            string[] codes = selected.Text.ToString().Split(';');
+
             selected.Cells.Clear();
             selected.Cells.ClearContents();
             selected.Cells.ClearFormats();
             selected.Cells.ClearNotes();
 
-            Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
-            string[] codes = selected.Text.ToString().Split(';');
-      
             if (conceptList != null)
             {
                 conceptList.Unprotect("dummy_password");
@@ -196,7 +327,7 @@ namespace ExcelQueryServiceAddIn
             this.Startup += new System.EventHandler(ThisAddIn_Startup);
             this.Shutdown += new System.EventHandler(ThisAddIn_Shutdown);
         }
-        
+
         #endregion
     }
 }

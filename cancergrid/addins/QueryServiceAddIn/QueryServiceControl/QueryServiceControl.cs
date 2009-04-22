@@ -597,7 +597,7 @@ namespace QueryServiceControl
                     defNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:definition", nsmanager);
                     ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
                     ocNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:object-class", nsmanager);
-                    propNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:property", nsmanager); 
+                    propNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:property-expanded", nsmanager); 
                     if (ccNode == null || ccNode.InnerXml.Length == 0)
                         ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:property-expanded[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
                     if (vdNode == null || vdNode.InnerXml.Length == 0)

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Xml; 
+using System.Xml;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelQueryServiceAddIn
@@ -18,7 +18,6 @@ namespace ExcelQueryServiceAddIn
 
         private Excel.Worksheet cdeList = null;
         private Excel.Worksheet conceptList = null;
-        private Excel.Worksheet ocList = null;
         private Excel.Worksheet propList = null;
 
         private static readonly string dummyPass = "dummy_password";
@@ -158,7 +157,7 @@ namespace ExcelQueryServiceAddIn
              * 
              * */
         }
-        
+
 
         protected override void useCLS(object sender, EventArgs e)
         {
@@ -176,9 +175,10 @@ namespace ExcelQueryServiceAddIn
             string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
 
             //Removing the institution identifying prefix from CADSR elements on client request
-            if (id.Contains("-CADSR-")){
+            if (id.Contains("-CADSR-"))
+            {
                 string[] idarr = id.Split('-');
-                id = idarr[idarr.Length - 2] + " v." + idarr[idarr.Length - 1];
+                id = idarr[idarr.Length - 2] + "v." + idarr[idarr.Length - 1];
             }
             string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
             string preferredNameTag = preferredName.Replace(" ", "_").Replace(",", "_"); ;
@@ -209,22 +209,22 @@ namespace ExcelQueryServiceAddIn
 
             if (selectedNode.Element(rs + "values").Element(rs + "enumerated") != null)
             {
-                
+
                 var validValues = from vv in selectedNode.Element(rs + "values").Element(rs + "enumerated").Elements(rs + "valid-value")
                                   select new
                                   {
                                       Code = vv.Element(rs + "code").Value,
                                       Meaning = vv.Element(rs + "meaning").Value,
-                                      ConceptCollection = vv.Elements(rs+"conceptCollection").Any()?
-                                      
+                                      ConceptCollection = vv.Elements(rs + "conceptCollection").Any() ?
+
                                       from cc in vv.Element(rs + "conceptCollection").Elements(rs + "evsconcept")
-                                                           orderby cc.Element(rs + "displayOrder").Value
-                                                           select new
-                                                           {
-                                                               DisplayOrder = cc.Element(rs + "displayOrder").Value,
-                                                               ConceptName = cc.Element(rs + "name").Value
-                                                           }
-                                      :null
+                                      orderby cc.Element(rs + "displayOrder").Value
+                                      select new
+                                      {
+                                          DisplayOrder = cc.Element(rs + "displayOrder").Value,
+                                          ConceptName = cc.Element(rs + "name").Value
+                                      }
+                                      : null
 
                                   };
 
@@ -278,7 +278,7 @@ namespace ExcelQueryServiceAddIn
                     if (vv.ConceptCollection != null)
                     {
                         foreach (var concept in vv.ConceptCollection)
-                            evscode += ":"+concept.ConceptName;
+                            evscode += ":" + concept.ConceptName;
 
                         evscode = evscode.Substring(1);
                         evscode = " | " + evscode;
@@ -286,7 +286,7 @@ namespace ExcelQueryServiceAddIn
 
                     attr += vv.Code + ",";
                     attrWithDef += vv.Code + " : (" + vv.Meaning.Replace(",", "&#44;").Replace("&lt;", "<").Replace("&gt;", ">") + "),";
-                    attrWithDefWithConc += vv.Code + " : ("+ vv.Meaning.Replace(",", "&#44;").Replace("&lt;", "<").Replace("&gt;", ">") + evscode+"),";
+                    attrWithDefWithConc += vv.Code + " : (" + vv.Meaning.Replace(",", "&#44;").Replace("&lt;", "<").Replace("&gt;", ">") + evscode + "),";
 
                 }
 
@@ -298,25 +298,26 @@ namespace ExcelQueryServiceAddIn
                     attr.Trim();
                 }
 
-                if (attr.Length > 0)
+                if (!annotate)
                 {
-                    try
+                    if (attr.Length > 0)
                     {
-                        int sc = selected.Count;
-                        xmlMap = workbook.XmlMaps.Add(x.ToString(), (selected.Count > 1) ? preferredNameTag + "List" : preferredNameTag);
-                        xmlMap.ShowImportExportValidationErrors = true;
-                        xmlMap.AdjustColumnWidth = true;
-                        selected.XPath.SetValue(xmlMap, (selected.Count > 1) ? "/rs:" + preferredNameTag + "List/rs:" + preferredNameTag : "/rs:" + preferredNameTag, "xmlns:rs=\"" + rs.NamespaceName + "\"", selected.Count > 1);
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        MessageBox.Show(ex.Message, "Range Selection Error");
-                        xmlMap.Delete();
-                        return;
-                    }
-                    selected.Validation.Delete();
-                    if (!annotate)
-                    {
+                        try
+                        {
+                            int sc = selected.Count;
+                            xmlMap = workbook.XmlMaps.Add(x.ToString(), (selected.Count > 1) ? preferredNameTag + "List" : preferredNameTag);
+                            xmlMap.ShowImportExportValidationErrors = true;
+                            xmlMap.AdjustColumnWidth = true;
+                            selected.XPath.SetValue(xmlMap, (selected.Count > 1) ? "/rs:" + preferredNameTag + "List/rs:" + preferredNameTag : "/rs:" + preferredNameTag, "xmlns:rs=\"" + rs.NamespaceName + "\"", selected.Count > 1);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            MessageBox.Show(ex.Message, "Range Selection Error");
+                            xmlMap.Delete();
+                            return;
+                        }
+                        selected.Validation.Delete();
+
                         //xs:enumeration
                         selected.Validation.Add(Excel.XlDVType.xlValidateList, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlBetween, attr, attr);
                         selected.Validation.InputTitle = "Select a value from the list";
@@ -335,7 +336,7 @@ namespace ExcelQueryServiceAddIn
                         selected.Validation.ErrorMessage = "Please select a value from the enumeration list.";
                     }
                 }
-               
+
             }
             else if (selectedNode.Element(rs + "values").Element(rs + "non-enumerated") != null)
             {
@@ -347,60 +348,60 @@ namespace ExcelQueryServiceAddIn
                 string restrictionAttr = "xs:string";
                 if (attr.StartsWith("xs:"))
                     restrictionAttr = attr;
-
-                XAttribute restrictionAttribute = new XAttribute("base", restrictionAttr);
-
-                XNamespace xs = "http://www.w3.org/2001/XMLSchema";
-                XDocument x =
-                    new XDocument(
-                        new XDeclaration("1.0", "utf-8", "yes"),
-                        new XElement(xs + "schema",
-                            new XAttribute(XNamespace.Xmlns + "xs", "http://www.w3.org/2001/XMLSchema"),
-                            new XAttribute("xmlns", "http://cancergrid.org/schema/result-set"),
-                            new XAttribute("targetNamespace", "http://cancergrid.org/schema/result-set"),
-                            new XElement(xs + "element",
-                                new XAttribute("name", preferredNameTag + "List"),
-                                new XAttribute("type", preferredNameTag + "List")
-                                ),
-                            new XElement(xs + "complexType",
-                                new XAttribute("name", preferredNameTag + "List"),
-                                new XElement(xs + "sequence",
-                                    new XElement(xs + "element",
-                                        new XAttribute("ref", preferredNameTag),
-                                        new XAttribute("minOccurs", "0"),
-                                        new XAttribute("maxOccurs", "unbounded")
-                                        )
-                                    )
-                                ),
-                            new XElement(xs + "element",
-                                new XAttribute("name", preferredNameTag),
-                                new XAttribute("type", preferredNameTag)
-                            ),
-                            new XElement(xs + "simpleType",
-                                new XAttribute("name", preferredNameTag),
-                                new XElement(xs + "annotation", definition),
-                                new XElement(xs + "restriction",
-                                    restrictionAttribute
-                                    )
-                                )
-                            )
-                        );
-                try
-                {
-                    xmlMap = workbook.XmlMaps.Add(x.ToString(), (selected.Count > 1) ? preferredNameTag + "List" : preferredNameTag);
-                    xmlMap.ShowImportExportValidationErrors = true;
-                    xmlMap.AdjustColumnWidth = true;
-                    selected.XPath.SetValue(xmlMap, (selected.Count > 1) ? "/rs:" + preferredNameTag + "List/rs:" + preferredNameTag : "/rs:" + preferredNameTag, "xmlns:rs=\"" + rs.NamespaceName + "\"", selected.Count > 1);
-                }
-                catch (ArgumentException ex)
-                {
-                    MessageBox.Show(ex.Message, "Range Selection Error");
-                    xmlMap.Delete();
-                    return;
-                }
-
                 if (!annotate)
                 {
+                    XAttribute restrictionAttribute = new XAttribute("base", restrictionAttr);
+
+                    XNamespace xs = "http://www.w3.org/2001/XMLSchema";
+                    XDocument x =
+                        new XDocument(
+                            new XDeclaration("1.0", "utf-8", "yes"),
+                            new XElement(xs + "schema",
+                                new XAttribute(XNamespace.Xmlns + "xs", "http://www.w3.org/2001/XMLSchema"),
+                                new XAttribute("xmlns", "http://cancergrid.org/schema/result-set"),
+                                new XAttribute("targetNamespace", "http://cancergrid.org/schema/result-set"),
+                                new XElement(xs + "element",
+                                    new XAttribute("name", preferredNameTag + "List"),
+                                    new XAttribute("type", preferredNameTag + "List")
+                                    ),
+                                new XElement(xs + "complexType",
+                                    new XAttribute("name", preferredNameTag + "List"),
+                                    new XElement(xs + "sequence",
+                                        new XElement(xs + "element",
+                                            new XAttribute("ref", preferredNameTag),
+                                            new XAttribute("minOccurs", "0"),
+                                            new XAttribute("maxOccurs", "unbounded")
+                                            )
+                                        )
+                                    ),
+                                new XElement(xs + "element",
+                                    new XAttribute("name", preferredNameTag),
+                                    new XAttribute("type", preferredNameTag)
+                                ),
+                                new XElement(xs + "simpleType",
+                                    new XAttribute("name", preferredNameTag),
+                                    new XElement(xs + "annotation", definition),
+                                    new XElement(xs + "restriction",
+                                        restrictionAttribute
+                                        )
+                                    )
+                                )
+                            );
+                    try
+                    {
+                        xmlMap = workbook.XmlMaps.Add(x.ToString(), (selected.Count > 1) ? preferredNameTag + "List" : preferredNameTag);
+                        xmlMap.ShowImportExportValidationErrors = true;
+                        xmlMap.AdjustColumnWidth = true;
+                        selected.XPath.SetValue(xmlMap, (selected.Count > 1) ? "/rs:" + preferredNameTag + "List/rs:" + preferredNameTag : "/rs:" + preferredNameTag, "xmlns:rs=\"" + rs.NamespaceName + "\"", selected.Count > 1);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        MessageBox.Show(ex.Message, "Range Selection Error");
+                        xmlMap.Delete();
+                        return;
+                    }
+
+
                     selected.Validation.Delete();
 
                     if (attr == "xs:nonNegativeInteger")
@@ -623,7 +624,7 @@ namespace ExcelQueryServiceAddIn
             //Since the XML map can be deleted if an exception is thrown, just set address manually.
             string selectedAddress = selected.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
             selectedAddress = selected.Worksheet.Name + "!" + selectedAddress;
-                
+
 
             //c.Hyperlinks.Add(c, "", xmlMap.Name, Type.Missing, id + ((selected.Count > 1) ? "(List)" : "(Single)") + ((instanceNum != null && instanceNum.Length > 0) ? "(" + instanceNum + ")" : "") + "\n\nRange: " + getSelectedRangeAddress(selected));
             c.Hyperlinks.Add(c, "", selectedAddress, Type.Missing, id);
@@ -707,11 +708,12 @@ namespace ExcelQueryServiceAddIn
             }
             else
             {
-                selected.Value2 = id ;
+                selected.Value2 = id;
                 selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, selected.Value2);
                 selected.Font.Bold = true;
                 selected.Font.Underline = false;
                 selected.Font.ColorIndex = 1;
+                annotateComment(selected);
                 Excel.Range rightCell = selected.get_Offset(0, 1);
                 if (rightCell != null && (rightCell.Value2 == null || ((string)rightCell.Value2).Length == 0))
                 {
@@ -738,7 +740,7 @@ namespace ExcelQueryServiceAddIn
             if (id.Contains("-CADSR-"))
             {
                 string[] idarr = id.Split('-');
-                id = idarr[idarr.Length - 2] + " v." + idarr[idarr.Length - 1];
+                id = idarr[idarr.Length - 2] + "v." + idarr[idarr.Length - 1];
             }
 
             string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
@@ -761,7 +763,7 @@ namespace ExcelQueryServiceAddIn
             string label = id + ":" + preferredName;
             string[] concepts = null;
             Excel.Range selected = (Excel.Range)application.Selection;
-            string hLinkLabel = label;
+            string hLinkLabel = "";
 
 
             if (annotate && (!name.Equals("vd") && !name.Equals("dec")))
@@ -791,16 +793,20 @@ namespace ExcelQueryServiceAddIn
                 if (selected.Value2 == null || selected.Value2.ToString().Length == 0)
                 {
                     selected.Value2 = label;
+                    hLinkLabel = label;
                 }
                 else
                 {
                     //Refuse to add?  Do you have to remove first?
                 }
             }
+            // empty hlink indicates non-empty cell.  don't overwrite
+            if (hLinkLabel.Length > 0)
+            {
 
             //Create concept list if not exists
 
-            propList = useList(propList, name+"_list");
+            propList = useList(propList, name + "_list");
 
             //Add new concept entry to concept_list
             propList.Unprotect(dummyPass);
@@ -831,14 +837,20 @@ namespace ExcelQueryServiceAddIn
             propList.Protect(dummyPass, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
 
             /* Remove hyperlinks for now until a suitable two way link method is found */
-            selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, hLinkLabel);
+            //Do not overwrite if something is in there already
 
-            selected.Font.Bold = true;
-            selected.Font.Underline = false;
-            selected.Font.ColorIndex = 1;
-            selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
-            selected.Interior.TintAndShade = 0.2;
 
+                selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, hLinkLabel);
+
+                selected.Font.Bold = true;
+                selected.Font.Underline = false;
+                selected.Font.ColorIndex = 1;
+                selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
+                selected.Interior.TintAndShade = 0.2;
+
+                if (annotate)
+                    annotateComment(selected);
+            }
         }
 
 
@@ -854,7 +866,7 @@ namespace ExcelQueryServiceAddIn
             string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
             string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
             string definition = selectedNode.Element(rs + "definition").Value;
-            
+
             string source = "";
 
             if (id.Contains("DESCLOGICCONCEPT"))
@@ -866,20 +878,20 @@ namespace ExcelQueryServiceAddIn
             else if (id.Contains("NMDP"))
                 source = "NMDP: NCI Approved EVS Concepts";
 
-                if (definition == null || definition.Length == 0)
+            if (definition == null || definition.Length == 0)
+            {
+                definition = "(No definition supplied)";
+            }
+            else
+            {
+                //Handle special caDSR/EVS format
+                definition = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("<![CDATA[", "").Replace("]]>", "");
+                if (definition.Contains("<def-source>"))
                 {
-                    definition = "(No definition supplied)";
+                    XElement e = XElement.Parse("<def>" + definition + "</def>");
+                    definition = e.Element("def-definition").Value + "\n(Source: " + e.Element("def-source").Value + ")";
                 }
-                else
-                {
-                    //Handle special caDSR/EVS format
-                    definition = definition.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("<![CDATA[", "").Replace("]]>", "");
-                    if (definition.Contains("<def-source>"))
-                    {
-                        XElement e = XElement.Parse("<def>" + definition + "</def>");
-                        definition = e.Element("def-definition").Value + "\n(Source: " + e.Element("def-source").Value + ")";
-                    }
-                }
+            }
 
             string code = null;
             if (id.StartsWith("http"))
@@ -945,7 +957,7 @@ namespace ExcelQueryServiceAddIn
                 for (int i = 3; c.Value2 != null; i++)
                 {
                     c = (Excel.Range)conceptList.Cells[i, 1];
-     
+
                 }
 
                 c.Value2 = id;
@@ -981,7 +993,7 @@ namespace ExcelQueryServiceAddIn
 
             /* Remove hyperlinks for now until a suitable two way link method is found */
             //selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, label);
-            
+
             selected.Font.Bold = true;
             selected.Font.Underline = false;
             selected.Font.ColorIndex = 1;
@@ -994,7 +1006,7 @@ namespace ExcelQueryServiceAddIn
         {
             string ret = "";
 
-            if (name.Equals("vd")) 
+            if (name.Equals("vd"))
             {
                 if (selectedNode.Element(rs + "enumerated") != null)
                 {
@@ -1032,15 +1044,16 @@ namespace ExcelQueryServiceAddIn
                         ret += vv.Code + " : (" + vv.Meaning.Replace(",", "&#44;").Replace("&lt;", "<").Replace("&gt;", ">") + evscode + "),";
                     }
 
-                    if (ret != null && ret.Contains(","))
-                        ret.Remove(ret.LastIndexOf(','));
+                    if (ret != null && ret.Contains(";"))
+                        ret.Remove(ret.LastIndexOf(';'));
 
                 }
                 else
                 {
                     ret = "data-type: " + selectedNode.Element(rs + "non-enumerated").Element(rs + "data-type").Value + "\nUnits: " + selectedNode.Element(rs + "non-enumerated").Element(rs + "units").Value;
                 }
-            } else if (name.Equals("dec")) 
+            }
+            else if (name.Equals("dec"))
             {
                 if (selectedNode.Element(rs + "object-class") != null)
                 {
@@ -1064,7 +1077,7 @@ namespace ExcelQueryServiceAddIn
                     }
 
                     ret += "\n";
-                    namesNode = selectedNode.Element(rs + "property").Element(rs + "names");
+                    namesNode = selectedNode.Element(rs + "property-expanded").Element(rs + "names");
                     id = namesNode.Element(rs + "id").Value;
                     prefName = namesNode.Element(rs + "preferred").Value;
                     var pnames = from nm in namesNode.Elements(rs + "all-names")
@@ -1083,11 +1096,12 @@ namespace ExcelQueryServiceAddIn
                     }
                 }
 
-            } else if (name.Equals("oc") || name.Equals("prop") || name.Equals("rt"))
+            }
+            else if (name.Equals("oc") || name.Equals("prop") || name.Equals("rt"))
             {
                 if (selectedNode.Element(rs + "conceptCollection") != null)
                 {
-                    
+
 
                     var conceptCollection = from cc in selectedNode.Element(rs + "conceptCollection").Elements(rs + "evsconcept")
                                             orderby cc.Element(rs + "displayOrder").Value descending
@@ -1201,7 +1215,10 @@ namespace ExcelQueryServiceAddIn
             (origin as Microsoft.Office.Interop.Excel._Worksheet).Activate();
         }
 
-
+        private void annotateComment(Excel.Range selected)
+        {
+            selected.AddComment("Annotated with Plugin");
+        }
 
         private Excel.Worksheet useList(Excel.Worksheet sheet, string name)
         {
@@ -1303,7 +1320,7 @@ namespace ExcelQueryServiceAddIn
             column.Next.Next.EntireColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignJustify;
 
             //Source
-            
+
             column.Next.Next.Next.Value2 = "Source";
             column.Next.Next.Next.Font.Bold = true;
             column.Next.Next.Next.Font.Background = Excel.XlBackground.xlBackgroundOpaque;
@@ -1311,7 +1328,7 @@ namespace ExcelQueryServiceAddIn
             column.Next.Next.Next.EntireColumn.VerticalAlignment = Excel.XlVAlign.xlVAlignTop;
             column.Next.Next.Next.EntireColumn.WrapText = true;
             column.Next.Next.Next.EntireColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignJustify;
-            
+
 
             //Definition
             column.Next.Next.Next.Next.Value2 = "Mapped Cells";
@@ -1321,8 +1338,8 @@ namespace ExcelQueryServiceAddIn
             column.Next.Next.Next.Next.EntireColumn.VerticalAlignment = Excel.XlVAlign.xlVAlignTop;
             column.Next.Next.Next.Next.EntireColumn.WrapText = true;
             column.Next.Next.Next.Next.EntireColumn.HorizontalAlignment = Excel.XlHAlign.xlHAlignJustify;
-            
-            
+
+
             conceptList.Protect(dummyPass, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
 
 

@@ -183,7 +183,7 @@
             this.tableLayoutPanelResults.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanelResults.ColumnCount = 4;
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 33F));
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 59F));
             this.tableLayoutPanelResults.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
             this.tableLayoutPanelResults.Controls.Add(this.lstResults, 0, 0);
@@ -229,7 +229,7 @@
             // btnBack
             // 
             this.btnBack.Enabled = false;
-            this.btnBack.Location = new System.Drawing.Point(103, 287);
+            this.btnBack.Location = new System.Drawing.Point(105, 287);
             this.btnBack.MinimumSize = new System.Drawing.Size(28, 22);
             this.btnBack.Name = "btnBack";
             this.btnBack.Size = new System.Drawing.Size(28, 22);
@@ -246,7 +246,7 @@
             this.btnUse.Name = "btnUse";
             this.btnUse.Size = new System.Drawing.Size(74, 22);
             this.btnUse.TabIndex = 1;
-            this.btnUse.Text = "Use";
+            this.btnUse.Text = "Create";
             this.btnUse.UseVisualStyleBackColor = true;
             this.btnUse.Click += new System.EventHandler(this.use);
             // 
