@@ -316,6 +316,9 @@
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
 			</registration-status>
+			<context>
+				<xsl:value-of select="context/Context/name"/>
+			</context>
 			<xsl:apply-templates select="property/Property"/>
 
 			<xsl:apply-templates select="objectClass/ObjectClass"/>
