@@ -374,6 +374,12 @@
             <file src="cancergrid/metadata-connector/config.xml" targetdir="$INSTALL_PATH/webapp/WEB-INF/classes"/>
             <parsable targetfile="$INSTALL_PATH/webapp/WEB-INF/classes/config.xml" type="xml"/>
         </pack>
+        <pack name="nmdp-dataset" required="no" installGroups="Core-with-Dataset,Everything">
+            <description>NMDP associated files</description>
+            <fileset targetdir="$INSTALL_PATH/nmdp" dir="nmdp"/>
+            <file src="terminology-Import.bat" targetdir="$INSTALL_PATH"/>            
+        </pack>
+        
         <pack name="Metadata Connector Source" required="no" parent="SOAP Services for cgMDR" preselected="no" installGroups="Everything">
             <description>Metadata Connector 1.0.2 Source</description>
             <fileset targetdir="$INSTALL_PATH/cancergrid/metadata-connector" dir="cancergrid/metadata-connector">
