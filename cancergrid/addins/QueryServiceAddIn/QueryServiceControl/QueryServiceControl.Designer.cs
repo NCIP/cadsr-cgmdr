@@ -246,7 +246,7 @@
             this.btnUse.Name = "btnUse";
             this.btnUse.Size = new System.Drawing.Size(74, 22);
             this.btnUse.TabIndex = 1;
-            this.btnUse.Text = "Create";
+            this.btnUse.Text = "Restrict";
             this.btnUse.UseVisualStyleBackColor = true;
             this.btnUse.Click += new System.EventHandler(this.use);
             // 
