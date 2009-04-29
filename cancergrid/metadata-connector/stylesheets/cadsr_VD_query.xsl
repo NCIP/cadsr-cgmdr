@@ -4,7 +4,7 @@
     <xsl:output method="text"/>
     
     <xsl:template match="/">
-        <xsl:value-of select="concat(/q:query/q:serviceUrl, '?query=ValueDomain&amp;ValueDomain[longName=*', replace(/q:query/q:term, ' ', '%20'),'*]&amp;startIndex=',/q:query/q:startIndex,'&amp;resultCounter=',/q:query/q:numResults)"/>
+        <xsl:value-of select="concat(/q:query/q:serviceUrl, '?query=ValueDomain&amp;ValueDomain[longName=', replace(/q:query/q:term, ' ', '%20'),']&amp;startIndex=',/q:query/q:startIndex,'&amp;resultCounter=',/q:query/q:numResults)"/>
     </xsl:template>
 
 </xsl:stylesheet>
