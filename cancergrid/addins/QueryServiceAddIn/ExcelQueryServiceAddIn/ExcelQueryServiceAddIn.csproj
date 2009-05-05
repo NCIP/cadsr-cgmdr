@@ -24,7 +24,7 @@
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <RootNamespace>ExcelQueryServiceAddIn</RootNamespace>
-    <AssemblyName>ExcelQueryServiceAddIn</AssemblyName>
+    <AssemblyName>cancergridExcelAddIn</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <ManifestCertificateThumbprint>2CF381A19BAE2320785FAF36A8382F8CE6D88F97</ManifestCertificateThumbprint>
     <ManifestKeyFile>ExcelQueryServiceAddIn_1_TemporaryKey.pfx</ManifestKeyFile>

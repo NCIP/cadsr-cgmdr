@@ -100,7 +100,7 @@ namespace ExcelQueryServiceAddIn
                             handleCommon(selectedNode, "prop", annotate);
                             break;
                         case "concept":
-                            handleConcept(selectedNode);
+                            handleConcept(selectedNode, annotate);
                             break;
                         case "conceptual-domain":
                             handleCommon(selectedNode, "cd", annotate);
@@ -222,7 +222,8 @@ namespace ExcelQueryServiceAddIn
                                       select new
                                       {
                                           DisplayOrder = cc.Element(rs + "displayOrder").Value,
-                                          ConceptName = cc.Element(rs + "name").Value
+                                          ConceptName = cc.Element(rs + "name").Value,
+                                          ConceptCode = cc.Element(rs + "code").Value
                                       }
                                       : null
 
@@ -278,7 +279,7 @@ namespace ExcelQueryServiceAddIn
                     if (vv.ConceptCollection != null)
                     {
                         foreach (var concept in vv.ConceptCollection)
-                            evscode += ":" + concept.ConceptName;
+                            evscode += "; " + concept.ConceptName + ":" + concept.ConceptCode;
 
                         evscode = evscode.Substring(1);
                         evscode = " | " + evscode;
@@ -712,7 +713,7 @@ namespace ExcelQueryServiceAddIn
                 selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, selected.Value2);
                 selected.Font.Bold = true;
                 selected.Font.Underline = false;
-                selected.Font.ColorIndex = 1;
+                //selected.Font.ColorIndex = 1;
                 annotateComment(selected);
                 Excel.Range rightCell = selected.get_Offset(0, 1);
                 if (rightCell != null && (rightCell.Value2 == null || ((string)rightCell.Value2).Length == 0))
@@ -768,7 +769,7 @@ namespace ExcelQueryServiceAddIn
 
             if (annotate && (!name.Equals("vd") && !name.Equals("dec")))
             {
-                concepts = extractConcepts(attr).Split(',');
+                concepts = extractConcepts(attr).Split(';');
                 Excel.Range leftCell = selected.get_Offset(0, -1);
                 string prim = concepts[concepts.Length - 1];
                 string quals = "";
@@ -843,13 +844,16 @@ namespace ExcelQueryServiceAddIn
                 selected.Hyperlinks.Add(selected, "", getSelectedRangeAddress(c), Type.Missing, hLinkLabel);
 
                 selected.Font.Bold = true;
-                selected.Font.Underline = false;
-                selected.Font.ColorIndex = 1;
-                selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
-                selected.Interior.TintAndShade = 0.2;
+                selected.Font.Underline = false;         
 
                 if (annotate)
                     annotateComment(selected);
+                else
+                {
+                    selected.Font.ColorIndex = 1;
+                    selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
+                    selected.Interior.TintAndShade = 0.2;
+                }
             }
         }
 
@@ -861,7 +865,7 @@ namespace ExcelQueryServiceAddIn
         /// TODO: Is two way hyperlink possible?
         /// </summary>
         /// <param name="selectedNode">Concept element to use</param>
-        protected void handleConcept(XElement selectedNode)
+        protected void handleConcept(XElement selectedNode, bool annotate)
         {
             string id = selectedNode.Element(rs + "names").Element(rs + "id").Value;
             string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
@@ -902,7 +906,7 @@ namespace ExcelQueryServiceAddIn
             {
                 code = id.Substring(id.LastIndexOf('-') + 1);
             }
-            string label = code + ": " + preferredName;
+            string label = code + ":" + preferredName;
 
 
 
@@ -996,9 +1000,15 @@ namespace ExcelQueryServiceAddIn
 
             selected.Font.Bold = true;
             selected.Font.Underline = false;
-            selected.Font.ColorIndex = 1;
-            selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
-            selected.Interior.TintAndShade = 0.6;
+
+            if (annotate)
+                annotateComment(selected);
+            else
+            {
+                selected.Font.ColorIndex = 1;
+                selected.Interior.ThemeColor = Excel.XlThemeColor.xlThemeColorAccent3;
+                selected.Interior.TintAndShade = 0.6;
+            }
 
         }
 
@@ -1109,17 +1119,18 @@ namespace ExcelQueryServiceAddIn
                                             {
                                                 DisplayOrder = cc.Element(rs + "displayOrder").Value,
                                                 ConceptName = cc.Element(rs + "name").Value,
+                                                ConceptCode = cc.Element(rs + "code").Value
                                             };
                     ret = "Concepts:\n";
                     foreach (var concept in conceptCollection)
                     {
                         ret += ((Convert.ToInt16((string)concept.DisplayOrder)) == 0) ? "P: " : "Q: ";
-                        ret += concept.ConceptName + ",";
+                        ret += concept.ConceptCode + ":" + concept.ConceptName + ";";
 
                     }
                     //Remove trailing comma
                     if (ret != null && ret.Length > 0)
-                        ret = ret.Substring(0, ret.Length - 1);
+                        ret = ret.Substring(0, ret.Length - 1); 
                 }
             }
 
@@ -1217,6 +1228,7 @@ namespace ExcelQueryServiceAddIn
 
         private void annotateComment(Excel.Range selected)
         {
+            selected.ClearComments();
             selected.AddComment("Annotated with Plugin");
         }
 

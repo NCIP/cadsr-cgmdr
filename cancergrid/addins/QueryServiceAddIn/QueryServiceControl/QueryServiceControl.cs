@@ -255,18 +255,18 @@ namespace QueryServiceControl
                 resultSetTypes[1] = "object-class";
                 resultSetTypes[2] = "property-expanded";
                 resultSetTypes[3] = "representation-term";
-                resultSetTypes[4] = "concept";
+                resultSetTypes[4] = "data-element-concept";
                 resultSetTypes[5] = "conceptual-domain";
                 resultSetTypes[6] = "values";
-                resultSetTypes[7] = "data-element-concept";
-
+                resultSetTypes[7] = "concept";
+                
                 XmlNodeList nodeList = null;
                 for (int i = 0; i < rstSize; i++)
                 {
                     nodeList = lastResult.DocumentElement.SelectNodes("/rs:result-set/rs:"+resultSetTypes[i], nsmanager);
-                    if (i > 4)
-                        btnAnnotate.Enabled = false;
-                    else
+                    //if (i > 6)
+                    //    btnAnnotate.Enabled = false;
+                    //else
                         btnAnnotate.Enabled = true;
 
                     if (nodeList != null && nodeList.Count > 0)
@@ -577,6 +577,7 @@ namespace QueryServiceControl
                 string values = null;
                 string props = null;
                 string other = null;
+                string nodeId = null;
                 XmlNode defNode = null;
                 XmlNode propsNode = null;
                 XmlNode vdNode = null;
@@ -594,6 +595,11 @@ namespace QueryServiceControl
                 {
                     vdNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:values", nsmanager);
                     propsNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:properties", nsmanager);
+                    if (propsNode != null)
+                    {
+                        nodeId = getSelectedItem(lstResults).ID;
+                        nodeId = nodeId.Substring(nodeId.LastIndexOf('-') + 1);
+                    }
                     defNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:definition", nsmanager);
                     ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
                     ocNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:data-element-concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:object-class", nsmanager);
@@ -610,7 +616,7 @@ namespace QueryServiceControl
                 }
                 if (defNode == null || defNode.InnerXml.Length == 0)
                 {
-                    definition = "<div style=\"font-size: 14px; text-aligh: justify;\">(No definition supplied)</div>";
+                    definition = "<div style=\"font-size: 12px; text-aligh: justify;\">(No definition supplied)</div>";
                 }
                 else
                 {
@@ -620,10 +626,10 @@ namespace QueryServiceControl
                         def = def.Trim().Replace("&gt;", ">").Replace("&lt;", "<").Replace("<![CDATA[", "").Replace("]]>", "");
                         XmlDocument filteredDoc = new XmlDocument();
                         filteredDoc.LoadXml("<temp>" + def + "</temp>");
-                        definition = "<div style=\"font-size: 14px; text-aligh: justify;\">" + filteredDoc.DocumentElement.SelectSingleNode("/temp/def-definition").InnerXml + "</div>";
+                        definition = "<div style=\"font-size: 12px; text-aligh: justify;\">" + filteredDoc.DocumentElement.SelectSingleNode("/temp/def-definition").InnerXml + "</div>";
                     } else
                     {
-                        definition = "<div style=\"font-size: 14px; text-aligh: justify;\">" + def + "</div>";
+                        definition = "<div style=\"font-size: 12px; text-aligh: justify;\">" + def + "</div>";
                     }
                 }
 
@@ -657,7 +663,7 @@ namespace QueryServiceControl
                                                        Meaning = ev.Element(rs + "meaning").Value,
                                                        ConceptCollection = ev.Element(rs + "conceptCollection")
                                                    };
-                            values = "<table style=\"width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Code</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Meaning</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Concept</th></tr>";
+                            values = "<table style=\"font-size: 12px;width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Code</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Meaning</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Concept</th></tr>";
                             foreach (var validValue in enumeratedValues)
                             {
                                 //deal with concept collection
@@ -669,11 +675,12 @@ namespace QueryServiceControl
                                                   select new
                                                   {
                                                       DisplayOrder = cc.Element(rs + "displayOrder").Value,
-                                                      ConceptName = cc.Element(rs + "name").Value
+                                                      ConceptName = cc.Element(rs + "name").Value,
+                                                      ConceptCode = cc.Element(rs + "code").Value
                                                   };
                                     foreach (var concept in conColl)
                                     {
-                                        conceptConcat += ":" + concept.ConceptName;
+                                        conceptConcat += ":" + concept.ConceptCode;
                                     }
                                     conceptConcat = conceptConcat.Substring(1);
                                 }
@@ -691,7 +698,7 @@ namespace QueryServiceControl
                                                        Code = ev.Element(rs + "code").Value,
                                                        Meaning = ev.Element(rs + "meaning").Value,
                                                    };
-                            values = "<table style=\"width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Code</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Meaning</th></tr>";
+                            values = "<table style=\"font-size: 12px;width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Value</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Meaning</th></tr>";
                             foreach (var validValue in enumeratedValues)
                             {
                                 values += "<tr><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + validValue.Code + "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + validValue.Meaning + "</td></tr>";
@@ -703,7 +710,7 @@ namespace QueryServiceControl
                     }
                     else if (x.Element(rs + "non-enumerated") != null)
                     {
-                        values = "<table style=\"width: 100%;border: 1px solid #ddd;border-collapse: collapse;\">";
+                        values = "<table style=\"font-size: 12px;width: 100%;border: 1px solid #ddd;border-collapse: collapse;\">";
                         values += "<tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">data-type</th><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + x.Element(rs + "non-enumerated").Element(rs + "data-type").Value + "</td></tr>";
                         values += "<tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">units</th><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + x.Element(rs + "non-enumerated").Element(rs + "units").Value + "</td></tr>";
                         values += "</table>";
@@ -722,7 +729,7 @@ namespace QueryServiceControl
                 else if (ccNode != null)
                 {
                     XElement x = XElement.Parse(ccNode.OuterXml);
-                    values = "<table style=\"width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Position</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Concept</th></tr>";
+                    values = "<table style=\"font-size: 12px;width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Position</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Name</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Identifier</th></tr>";
 
                     var conceptCollection = from cc in x.Elements(rs + "evsconcept")
                                             orderby cc.Element(rs + "displayOrder").Value descending
@@ -730,6 +737,7 @@ namespace QueryServiceControl
                                             {
                                                 DisplayOrder = cc.Element(rs + "displayOrder").Value,
                                                 ConceptName = cc.Element(rs + "name").Value,
+                                                ConceptCode = cc.Element(rs + "code").Value
                                             };
 
                     foreach (var concept in conceptCollection)
@@ -737,8 +745,9 @@ namespace QueryServiceControl
                         values += "<tr><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">";
                         values += ((Convert.ToInt16((string)concept.DisplayOrder)) == 0) ? "Primary" : "Qualifier";
                         values += "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">";
-                        values += concept.ConceptName + "</td></tr>";
-
+                        values += concept.ConceptName;
+                        values += "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">";
+                        values += concept.ConceptCode + "</td></tr>";
                     }
 
                     values += "</table>";
@@ -754,7 +763,10 @@ namespace QueryServiceControl
                                          Name = p.Element(rs + "name").Value,
                                          Value = p.Element(rs + "value").Value
                                      };
-                    props = "<table style=\"border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Name</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Value</th></tr>";
+                    props = "<table style=\"font-size: 12px;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Name</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Value</th></tr>";
+                    
+                    props += "<tr><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">ID</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + nodeId + "</td></tr>";
+                       
                     foreach (var prop in properties)
                     {
                         props += "<tr><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + prop.Name + "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + prop.Value + "</td></tr>";
@@ -769,7 +781,7 @@ namespace QueryServiceControl
                 else if (ocNode != null || propNode != null)
                 {
 
-                    props = "<table style=\"border: 1px solid #ddd;border-collapse: collapse;\">";
+                    props = "<table style=\"font-size: 12px;border: 1px solid #ddd;border-collapse: collapse;\">";
                     props += "<tr><th colspan=2 style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Object Class</th></tr>";
                     props += formatBasicInfo(ocNode, rs);
 
@@ -803,29 +815,29 @@ namespace QueryServiceControl
 
             if (wfNode == null || wfNode.InnerXml.Length == 0)
             {
-                other = "<div style=\"font-size: 14px; text-aligh: justify;\">(No workflow status supplied)</div>";
+                other = "<div style=\"font-size: 12px; text-aligh: justify;\">(No workflow status supplied)</div>";
             }
             else
             {
-                other = "<div style=\"font-size: 14px; text-aligh: justify;\">Workflow Status: " + wfNode.InnerXml + "</div>";
+                other = "<div style=\"font-size: 12px; text-aligh: justify;\">Workflow Status: " + wfNode.InnerXml + "</div>";
             }
 
             if (regNode == null || regNode.InnerXml.Length == 0 || regNode.InnerXml.Length == 1)
             {
-                other += "<p><div style=\"font-size: 14px; text-aligh: justify;\">(No registration status supplied)</div>";
+                other += "<p><div style=\"font-size: 12px; text-aligh: justify;\">(No registration status supplied)</div>";
             }
             else
             {
-                other += "<p><div style=\"font-size: 14px; text-aligh: justify;\">Registration Status: " + regNode.InnerXml + "</div>";
+                other += "<p><div style=\"font-size: 12px; text-aligh: justify;\">Registration Status: " + regNode.InnerXml + "</div>";
             }
 
             if (ctxNode == null || ctxNode.InnerXml.Length == 0)
             {
-                other += "<p><div style=\"font-size: 14px; text-aligh: justify;\">(No context supplied)</div>";
+                other += "<p><div style=\"font-size: 12px; text-aligh: justify;\">(No context supplied)</div>";
             }
             else
             {
-                other += "<p><div style=\"font-size: 14px; text-aligh: justify;\">Context: " + ctxNode.InnerXml + "</div>";
+                other += "<p><div style=\"font-size: 12px; text-aligh: justify;\">Context: " + ctxNode.InnerXml + "</div>";
             }
 
             return other;

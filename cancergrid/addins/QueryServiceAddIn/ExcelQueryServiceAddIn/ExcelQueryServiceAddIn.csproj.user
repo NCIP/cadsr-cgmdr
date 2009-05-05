@@ -1,7 +1,6 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <PublishUrlHistory>
-    </PublishUrlHistory>
+    <PublishUrlHistory>C:\projects\cgmdr-nci\cancergrid\addins\Excel2007AddIn\</PublishUrlHistory>
     <InstallUrlHistory>http://localhost:8080/AddIns/Excel2007AddIn/|http://localhost:8080/ExcelAddIn/|http://localhost:7080/ExcelAddIn/|http://localhost:7080/ExcelQueryServiceAddIn/|http://cg1.comlab.ox.ac.uk:7080/ExcelAddIn/</InstallUrlHistory>
   </PropertyGroup>
   <ProjectExtensions>

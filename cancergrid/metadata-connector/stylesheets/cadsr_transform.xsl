@@ -284,8 +284,11 @@
 				<xsl:value-of select="displayOrder"/>
 			</displayOrder>
 			<name>
-				<xsl:value-of select="concept/Concept/preferredName"/>
+				<xsl:value-of select="concept/Concept/longName"/>
 			</name>
+			<code>
+				<xsl:value-of select="concept/Concept/preferredName"/>
+			</code>
 		</evsconcept>
 	</xsl:template>
 	
