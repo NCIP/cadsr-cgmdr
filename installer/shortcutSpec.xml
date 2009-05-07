@@ -12,7 +12,7 @@
         target="$INSTALL_PATH/bin/client.bat"
 		description="Start the command-line client" programGroup="yes"
         desktop="yes" terminal="false"/>
-	<shortcut name="NMDP resources" target="$INSTALL_PATH/nmdp/" description="NMDP Resources"
+	<shortcut name="Local resources" target="$INSTALL_PATH/nmdp/" description="Local Resources"
 		programGroup="yes" desktop="yes"/>
 	<shortcut name="Excel 2007 Addin Setup" target="$INSTALL_PATH/cancergrid/addins/Excel2007AddIn/setup.exe"
 		description="Install the Cancergrid Excel Addin" programGroup="yes" desktop="yes"/>
@@ -24,7 +24,7 @@
 		target="$INSTALL_PATH/tools/wrapper/bin/uninstall.bat"
 		description="Uninstall the eXist service"
 		programGroup="yes" desktop="no"/>
-	<shortcut name="Uninstall" target="$INSTALL_PATH/Uninstaller/uninstaller.jar"
+	<shortcut name="Uninstall cgMDR" target="$INSTALL_PATH/Uninstaller/uninstaller.jar"
 		description="Uninstall cgMDR" programGroup="yes"/>
 	<shortcut name="DB Check and Export Tool"
         target="$INSTALL_PATH/bin/check.bat"
