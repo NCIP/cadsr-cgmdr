@@ -178,7 +178,7 @@ namespace ExcelQueryServiceAddIn
             if (id.Contains("-CADSR-"))
             {
                 string[] idarr = id.Split('-');
-                id = idarr[idarr.Length - 2] + "v." + idarr[idarr.Length - 1];
+                id = idarr[idarr.Length - 2] + "v" + idarr[idarr.Length - 1];
             }
             string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;
             string preferredNameTag = preferredName.Replace(" ", "_").Replace(",", "_"); ;
@@ -741,7 +741,7 @@ namespace ExcelQueryServiceAddIn
             if (id.Contains("-CADSR-"))
             {
                 string[] idarr = id.Split('-');
-                id = idarr[idarr.Length - 2] + "v." + idarr[idarr.Length - 1];
+                id = idarr[idarr.Length - 2] + "v" + idarr[idarr.Length - 1];
             }
 
             string preferredName = selectedNode.Element(rs + "names").Element(rs + "preferred").Value;

@@ -36,7 +36,7 @@ namespace ExcelQueryServiceAddIn
 
             Office._CommandBarButtonEvents_ClickEventHandler lButtonHandler =
                 new Office._CommandBarButtonEvents_ClickEventHandler(unmapListClick);
-               
+
 
             //Uncomment and Loop to find correct command dropdown menu.
             /*
@@ -85,40 +85,88 @@ namespace ExcelQueryServiceAddIn
             string cellContent = selected.Cells.Text.ToString();
             if (cellXPath.Contains("concept"))
             {
-                Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
-                string[] codes = selected.Text.ToString().Split(';');
-
-                selected.Cells.Clear();
-                selected.Cells.ClearContents();
-                selected.Cells.ClearFormats();
-                selected.Cells.ClearNotes();
-
-                if (conceptList != null)
+                if (!cellXPath.Contains("conceptual"))
                 {
-                    conceptList.Unprotect("dummy_password");
+                    System.Collections.IEnumerator ir = selected.Hyperlinks.GetEnumerator();
 
-                    //Use Excel built-in Find feature to search for matched row
-                    foreach (String code in codes)
+                    string hAddy = "";
+                    string hName = "";
+                    if (ir != null)
                     {
-                        string c = code.Split(':')[0];
-                        Excel.Range found = conceptList.Cells.Find(c, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
-                        if (found != null)
+                        while (ir.MoveNext())
                         {
-                            int counter = Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString()) - 1;
-                            if (counter < 1)
+                            Excel.Hyperlink hr = (Excel.Hyperlink)ir.Current;
+                            hName = hr.Name;
+                            hAddy = hr.SubAddress;
+                        }
+                        if (hName.Length > 0 && hAddy.Length > 0)
+                        {
+                            string listName = hAddy.Split('!')[0];
+
+                            Excel.Worksheet list = (Excel.Worksheet)this.Application.Sheets[listName];
+                            Excel.Range details = list.get_Range(hAddy, Type.Missing);
+
+                            //Excel.Range c = (Excel.Range)list.Cells[2, 1];
+                            Excel.Range c = details;
+                            string hId = hName.Split('v')[0].Trim();
+                            for (int i = details.Cells.Row; i < 10000; i++)
                             {
-                                found.EntireRow.Delete(Type.Missing); //Remove entire row
+                                c = (Excel.Range)list.Cells[i, 1];
+                                Excel.Range ce = (Excel.Range)list.Cells[i, 4];
+                                string text = ce.Text.ToString();
+                                if (text.Contains(hId))
+                                    break;
                             }
-                            else
-                            {
-                                found.Next.Next.Next.Next.Value2 = counter;
-                            }
+
+                            list.Unprotect("dummy_password");
+                            c.Clear();
+                            c.Next.Clear();
+                            c.Next.Next.Clear();
+                            c.Next.Next.Next.Clear();
+                            list.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+
                         }
                     }
+                    else
+                    {
 
-                    conceptList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                        Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
+                        string[] codes = selected.Text.ToString().Split(';');
+
+                        selected.Cells.Clear();
+                        selected.Cells.ClearContents();
+                        selected.Cells.ClearFormats();
+                        selected.Cells.ClearNotes();
+
+                        if (conceptList != null)
+                        {
+                            conceptList.Unprotect("dummy_password");
+
+                            //Use Excel built-in Find feature to search for matched row
+                            foreach (String code in codes)
+                            {
+                                string c = code.Split(':')[0];
+                                Excel.Range found = conceptList.Cells.Find(c, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
+                                if (found != null)
+                                {
+                                    int counter = Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString()) - 1;
+                                    if (counter < 1)
+                                    {
+                                        found.EntireRow.Delete(Type.Missing); //Remove entire row
+                                    }
+                                    else
+                                    {
+                                        found.Next.Next.Next.Next.Value2 = counter;
+                                    }
+                                }
+                            }
+
+                            conceptList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                        }
+                    }
                 }
-
+                else
+                    removeId(selected, "cd");
             }
             else if (cellXPath.Contains("cdeid"))
                 removeId(selected, "cde");
@@ -151,18 +199,23 @@ namespace ExcelQueryServiceAddIn
                 hName = hr.Name;
                 hAddy = hr.SubAddress;
             }
+            //List name
+            string listName = hAddy.Split('!')[0];
 
-            string selectedRangeString = ((Excel.Worksheet)selected.Parent).Name + "!" + selected.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
-            Excel.Worksheet list = (Excel.Worksheet)this.Application.Sheets[listType+"_list"];
+            //string selectedParent = ((Excel.Worksheet)selected.Parent).Name;
+            //string selectedAddress = selected.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
+            //string selectedRangeString = ((Excel.Worksheet)selected.Parent).Name + "!" + selected.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
+            Excel.Worksheet list = (Excel.Worksheet)this.Application.Sheets[listName];
             Excel.Range details = list.get_Range(hAddy, Type.Missing);
 
             //Excel.Range c = (Excel.Range)list.Cells[2, 1];
             Excel.Range c = details;
+            string hId = hName.Split('v')[0];
             for (int i = details.Cells.Row; i < 10000; i++)
             {
                 c = (Excel.Range)list.Cells[i, 1];
                 string text = c.Text.ToString();
-                if (text.Contains(hName))
+                if (text.Contains(hId))
                     break;
             }
 
@@ -171,6 +224,7 @@ namespace ExcelQueryServiceAddIn
             c.Next.Clear();
             c.Next.Next.Clear();
             c.Next.Next.Next.Clear();
+            c.Next.Next.Next.Next.Clear();
             list.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
 
         }
@@ -178,108 +232,155 @@ namespace ExcelQueryServiceAddIn
         private void unmapXMLClick(Office.CommandBarButton button, ref bool Cancel)
         {
             Excel.Range selected = (Excel.Range)this.Application.Selection;
+
+            System.Collections.IEnumerator ir = selected.Hyperlinks.GetEnumerator();
+
+            string hAddy = "";
+            string hName = "";
+            if (ir != null)
+            {
+                while (ir.MoveNext())
+                {
+                    Excel.Hyperlink hr = (Excel.Hyperlink)ir.Current;
+                    hName = hr.Name;
+                    hAddy = hr.SubAddress;
+                }
+                if (hName.Length > 0 && hAddy.Length > 0)
+                {
+                    string listName = hAddy.Split('!')[0];
+
+                    Excel.Worksheet list = (Excel.Worksheet)this.Application.Sheets[listName];
+                    Excel.Range details = list.get_Range(hAddy, Type.Missing);
+
+                    //Excel.Range c = (Excel.Range)list.Cells[2, 1];
+                    Excel.Range c = details;
+                    string hId = hName.Split('v')[0];
+                    for (int i = details.Cells.Row; i < 10000; i++)
+                    {
+                        c = (Excel.Range)list.Cells[i, 1];
+                        string text = c.Text.ToString();
+                        if (text.Contains(hId))
+                            break;
+                    }
+
+                    list.Unprotect("dummy_password");
+                    c.Clear();
+                    c.Next.Clear();
+                    c.Next.Next.Clear();
+                    c.Next.Next.Next.Clear();
+                    list.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+
+                }
+            }
+
             selected.Cells.Clear();
             selected.Cells.ClearContents();
             selected.Cells.ClearFormats();
             selected.Cells.ClearNotes();
 
-            string selectedRangeString = ((Excel.Worksheet)selected.Parent).Name + "!" + selected.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
-            Excel.Worksheet cdeList = (Excel.Worksheet)this.Application.Sheets["cde_list"];
+            //string selectedRangeString = ((Excel.Worksheet)selected.Parent).Name + "!" + selected.get_Address(Type.Missing, Type.Missing, Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
+            //Excel.Worksheet cdeList = (Excel.Worksheet)this.Application.Sheets["cde_list"];
 
-            Excel.Range c = (Excel.Range)cdeList.Cells[2, 1];
-            for (int i = 2; i < 10000; i++)
-            {
-                c = (Excel.Range)cdeList.Cells[i, 1];
-                string text = c.Text.ToString();
-                if (text.Contains(selectedRangeString))
-                    break;
-            }
+            //Excel.Range c = (Excel.Range)cdeList.Cells[2, 1];
+            //for (int i = 2; i < 10000; i++)
+            //{
+            //    c = (Excel.Range)cdeList.Cells[i, 1];
+            //    string text = c.Text.ToString();
+            //    if (text.Contains(selectedRangeString))
+            //        break;
+            //}
 
-            cdeList.Unprotect("dummy_password");
-            c.Clear();
-            c.Next.Clear();
-            c.Next.Next.Clear();
-            c.Next.Next.Next.Clear();
-            cdeList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+            //cdeList.Unprotect("dummy_password");
+            //c.Clear();
+            //c.Next.Clear();
+            //c.Next.Next.Clear();
+            //c.Next.Next.Next.Clear();
+            //cdeList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
 
         }
 
         private void unmapHeaderClick(Office.CommandBarButton button, ref bool Cancel)
         {
             Excel.Range selected = (Excel.Range)this.Application.Selection;
+            System.Collections.IEnumerator ir = selected.Hyperlinks.GetEnumerator();
 
-            Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
-            string[] codes = selected.Text.ToString().Split(';');
+            string hAddy = "";
+            string hName = "";
+            if (ir != null)
+            {
+                while (ir.MoveNext())
+                {
+                    Excel.Hyperlink hr = (Excel.Hyperlink)ir.Current;
+                    hName = hr.Name;
+                    hAddy = hr.SubAddress;
+                }
+                if (hName.Length > 0 && hAddy.Length > 0)
+                {
+                    string listName = hAddy.Split('!')[0];
+
+                    Excel.Worksheet list = (Excel.Worksheet)this.Application.Sheets[listName];
+                    Excel.Range details = list.get_Range(hAddy, Type.Missing);
+
+                    //Excel.Range c = (Excel.Range)list.Cells[2, 1];
+                    Excel.Range c = details;
+                    string hId = hName.Split('v')[0];
+                    for (int i = details.Cells.Row; i < 10000; i++)
+                    {
+                        c = (Excel.Range)list.Cells[i, 1];
+                        string text = c.Text.ToString();
+                        if (text.Contains(hId))
+                            break;
+                    }
+
+                    list.Unprotect("dummy_password");
+                    c.Clear();
+                    c.Next.Clear();
+                    c.Next.Next.Clear();
+                    c.Next.Next.Next.Clear();
+                    list.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                }
+            }
+            else
+            {
+                string[] codes = selected.Text.ToString().Split(';');
+                selected.Cells.Clear();
+                selected.Cells.ClearContents();
+                selected.Cells.ClearFormats();
+                selected.Cells.ClearNotes();
+
+                Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
+
+                if (conceptList != null)
+                {
+                    conceptList.Unprotect("dummy_password");
+
+                    //Use Excel built-in Find feature to search for matched row
+                    foreach (String code in codes)
+                    {
+                        string c = code.Split(':')[0];
+                        Excel.Range found = conceptList.Cells.Find(c, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
+                        if (found != null)
+                        {
+                            int counter = Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString()) - 1;
+                            if (counter < 1)
+                            {
+                                found.EntireRow.Delete(Type.Missing); //Remove entire row
+                            }
+                            else
+                            {
+                                found.Next.Next.Next.Next.Value2 = counter;
+                            }
+                        }
+                    }
+
+                    conceptList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                }
+            }
 
             selected.Cells.Clear();
             selected.Cells.ClearContents();
             selected.Cells.ClearFormats();
             selected.Cells.ClearNotes();
-
-            if (conceptList != null)
-            {
-                conceptList.Unprotect("dummy_password");
-
-                //Use Excel built-in Find feature to search for matched row
-                foreach (String code in codes)
-                {
-                    string c = code.Split(':')[0];
-                    Excel.Range found = conceptList.Cells.Find(c, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
-                    if (found != null)
-                    {
-                        int counter = Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString()) - 1;
-                        if (counter < 1)
-                        {
-                            found.EntireRow.Delete(Type.Missing); //Remove entire row
-                        }
-                        else
-                        {
-                            found.Next.Next.Next.Next.Value2 = counter;
-                        }
-                    }
-                }
-
-                /*
-                Excel.Range c = (Excel.Range)conceptList.Cells[2, 1];
-                bool loop = true;
-                for (int i = 2; loop; i++)
-                {
-                    c = (Excel.Range)conceptList.Cells[i, 1];
-
-                    //Go through all concepts in the field
-                    //If the concept is already mapped, decrement it's Mapped counter
-                    
-                    for (int a = 0; a < codes.Length; a++)
-                    {
-                        string code = codes[a].Split(':')[0];
-                        if (c.Text.ToString().Contains(code))
-                        {
-                            int counter = Convert.ToInt16(c.Next.Next.Next.Next.Text);
-                            
-                            //If no more mapped, clear the row.
-                            if (counter - 1 == 0)
-                            {
-                                c.Clear();
-                                c.Next.Clear();
-                                c.Next.Next.Clear();
-                                c.Next.Next.Next.Clear();
-                                c.Next.Next.Next.Next.Clear();
-                            }
-                            //Otherwise just decrement counter.
-                            else
-                            {
-                                c.Next.Next.Next.Next.Value2 = counter - 1;
-                            }
-                            loop = false;
-                            break;
-                        }
-                    }
-                    
-                }
-                */
-                conceptList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
-            }
-
         }
 
         public void AddQueryServiceTaskPane()

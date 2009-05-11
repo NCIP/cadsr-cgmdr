@@ -110,13 +110,24 @@
 			<description>NCICB Resource for Common Data Elements</description>
 			<webUrl>http://ncicb.nci.nih.gov/NCICB/infrastructure/cacore_overview/cadsr</webUrl>			
 		</query_service>
-		<query_service name="caDSR-ConceptualDomain"
+		<query_service name="caDSR-ConceptualDomain-preferredName"
 			class="org.cancergrid.ws.query.RestQueryService"
 			serviceUrl="http://cadsrapi.nci.nih.gov/cadsrapi40/GetXML"
 			cache_collection_id="caDSR-ConceptualDomain" cache="false"
 			cache_provider="HibernateCacheProvider" 
 			category="CDE" connection_type="REST"
 			requestSequence="cadsr_cd_query" digestSequence="cadsr_construct fixtag cadsr_transform add_cg_namespace">
+			<title>NCI Cancer Data Standards Repository (caDSR)</title>
+			<description>NCICB Resource for Common Data Elements</description>
+			<webUrl>http://ncicb.nci.nih.gov/NCICB/infrastructure/cacore_overview/cadsr</webUrl>			
+		</query_service>
+		<query_service name="caDSR-ConceptualDomain-longName"
+			class="org.cancergrid.ws.query.RestQueryService"
+			serviceUrl="http://cadsrapi.nci.nih.gov/cadsrapi40/GetXML"
+			cache_collection_id="caDSR-ConceptualDomain" cache="false"
+			cache_provider="HibernateCacheProvider" 
+			category="CDE" connection_type="REST"
+			requestSequence="cadsr_cd_ln_query" digestSequence="cadsr_construct fixtag cadsr_transform add_cg_namespace">
 			<title>NCI Cancer Data Standards Repository (caDSR)</title>
 			<description>NCICB Resource for Common Data Elements</description>
 			<webUrl>http://ncicb.nci.nih.gov/NCICB/infrastructure/cacore_overview/cadsr</webUrl>			
