@@ -237,7 +237,8 @@ namespace QueryServiceControl
                     query.startIndex = currentPage * pageSize;
                 }
                 //Workaround for SDK caused caDSR API bug.
-                query.numResults = pageSize + 1;
+                //Double page size to have full page after filtering.
+                query.numResults = pageSize*2;
                 //if (currentPage > 0) 
                 //    query.numResults = 200+(pageSize*currentPage)+1;
 
@@ -281,6 +282,9 @@ namespace QueryServiceControl
                     return;
                 }
 
+                //statusMsg.Text = "Query completed.";
+                SetStatus("Listing results");
+
                 listResults(nodeList, lstResults);
                 btnUse.Enabled = true;
 
@@ -293,9 +297,7 @@ namespace QueryServiceControl
                 {
                     btnForward.Enabled = true;
                 }
-
-                //statusMsg.Text = "Query completed.";
-                SetStatus("Query completed");
+                SetStatus("Query Completed");
             }
             catch (Exception ex)
             {
@@ -311,6 +313,19 @@ namespace QueryServiceControl
         private void listResults(XmlNodeList results, ListBox target)
         {
             target.Items.Clear();
+
+            bool filtered = false;
+            int itemsShown = 0;
+
+            string[] restrictedW = new string[7];
+            restrictedW[0] = "CMTE APPROVED";
+            restrictedW[1] = "CMTE SUBMTD";
+            restrictedW[2] = "CMTE SUBMTD USED";
+            restrictedW[3] = "RETIRED ARCHIVED";
+            restrictedW[4] = "RETIRED PHASED OUT";
+            restrictedW[5] = "RETIRED WITHDRAWN";
+            restrictedW[6] = "RETIRED DELETED";
+
             foreach (XmlNode node in results)
             {
 
@@ -333,28 +348,20 @@ namespace QueryServiceControl
                     if (node.SelectSingleNode("rs:workflow-status", nsmanager) != null) {
                         workflow = node.SelectSingleNode("rs:workflow-status", nsmanager).InnerXml;
                         string wku = workflow.ToUpper();
-                        string[] restrictedW = new string[7];
-                        restrictedW[0]="CMTE APPROVED";
-                        restrictedW[1]="CMTE SUBMTD";
-                        restrictedW[2]="CMTE SUBMTD USED";
-                        restrictedW[3]="RETIRED ARCHIVED";
-                        restrictedW[4]="RETIRED PHASED OUT";
-                        restrictedW[5]="RETIRED WITHDRAWN";
-                        restrictedW[6]="RETIRED DELETED";
 
-                        for (int i = 0; i < 7; i++)
+                        for (int i = 0; i < restrictedW.Length; i++)
                         {
-                            if (workflow.ToUpper().Contains(restrictedW[i]))
+                            if (wku.Contains(restrictedW[i]))
                             {
                                 retiredWorkflow = true;
                                 break;
                             }
                         }
-
                     }
+
                     if (!retiredWorkflow)
                     {
-
+                        itemsShown = itemsShown + 1;
                         string id = node.SelectSingleNode("rs:names/rs:id", nsmanager).InnerXml;
                         string name = node.SelectSingleNode("rs:names/rs:preferred", nsmanager).InnerXml;
                         string ver = "";
@@ -391,12 +398,21 @@ namespace QueryServiceControl
                         target.Items.Add(new QueryListItem(id, name));
                     }
                 }
+                if (itemsShown == pageSize)
+                    break;
+
+                if (retiredWorkflow || testContext)
+                    filtered = true;
             }
 
             if (target.Items.Count == pageSize + 1)
             {
                 target.Items.RemoveAt(pageSize);
             }
+            //if (filtered)
+            //    SetStatus("Query Completed (Retired items filtered)");
+            //else
+            //    SetStatus("Query Completed");
 
             target.DisplayMember = "NAME";
             target.ValueMember = "ID";          
