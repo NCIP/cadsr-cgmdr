@@ -663,7 +663,7 @@ namespace QueryServiceControl
                                                        Meaning = ev.Element(rs + "meaning").Value,
                                                        ConceptCollection = ev.Element(rs + "conceptCollection")
                                                    };
-                            values = "<table style=\"font-size: 12px;width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Code</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Meaning</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Concept</th></tr>";
+                            values = "<table style=\"font-size: 12px;width: 100%;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Value</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Meaning</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Concept</th></tr>";
                             foreach (var validValue in enumeratedValues)
                             {
                                 //deal with concept collection
