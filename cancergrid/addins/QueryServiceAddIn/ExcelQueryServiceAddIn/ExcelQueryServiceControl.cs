@@ -767,9 +767,9 @@ namespace ExcelQueryServiceAddIn
             string hLinkLabel = "";
 
 
-            if (annotate && (!name.Equals("vd") && !name.Equals("dec")))
+            if (annotate && (!name.Equals("vd") && !name.Equals("dec") && !name.Equals("cd")))
             {
-                concepts = extractConcepts(attr).Split(';');
+                concepts = extractConcepts(attr).Split(';'); 
                 Excel.Range leftCell = selected.get_Offset(0, -1);
                 string prim = concepts[concepts.Length - 1];
                 string quals = "";
