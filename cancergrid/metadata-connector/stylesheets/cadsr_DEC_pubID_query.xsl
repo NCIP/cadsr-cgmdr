@@ -4,7 +4,7 @@
     <xsl:output method="text"/>
     
     <xsl:template match="/">
-        <xsl:value-of select="concat(/q:query/q:serviceUrl, '?query=DataElementConcept&amp;DataElementConcept[publicID=', replace(/q:query/q:term, ' ', '%20'),']&amp;startIndex=',/q:query/q:startIndex,'&amp;resultCounter=',/q:query/q:numResults)"/>
+        <xsl:value-of select="concat(/q:query/q:serviceUrl, '?query=DataElementConcept&amp;DataElementConcept[publicID=', replace(/q:query/q:term, ' ', '%20'),']&amp;startIndex=',/q:query/q:startIndex,'&amp;pageSize=',/q:query/q:numResults)"/>
     </xsl:template>
 
 </xsl:stylesheet>

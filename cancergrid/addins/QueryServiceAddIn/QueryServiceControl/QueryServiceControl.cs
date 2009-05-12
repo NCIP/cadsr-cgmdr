@@ -238,8 +238,8 @@ namespace QueryServiceControl
                 }
                 //Workaround for SDK caused caDSR API bug.
                 query.numResults = pageSize + 1;
-                if (currentPage > 0) 
-                    query.numResults = 200+(pageSize*currentPage)+1;
+                //if (currentPage > 0) 
+                //    query.numResults = 200+(pageSize*currentPage)+1;
 
                 string response = qsm.queryString(query);
 

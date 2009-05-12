@@ -13,17 +13,17 @@
                     </xsl:for-each>
                 </xsl:variable>
                 <xsl:value-of
-                    select="concat(/q:query/q:serviceUrl, '?query=MetaThesaurusConcept&amp;MetaThesaurusConcept[name=*',replace(/q:query/q:term, ' ', '%20'),'*]/Source', $sources ,'&amp;startIndex=',/q:query/q:startIndex,'&amp;resultCounter=',/q:query/q:numResults)"
+                    select="concat(/q:query/q:serviceUrl, '?query=MetaThesaurusConcept&amp;MetaThesaurusConcept[name=*',replace(/q:query/q:term, ' ', '%20'),'*]/Source', $sources ,'&amp;startIndex=',/q:query/q:startIndex,'&amp;pageSize=',/q:query/q:numResults)"
                 />
             </xsl:when>
             <xsl:when test="normalize-space(/q:query/q:src/text()) != ''">
                 <xsl:value-of
-                    select="concat(/q:query/q:serviceUrl, '?query=MetaThesaurusConcept&amp;MetaThesaurusConcept[name=*',replace(/q:query/q:term, ' ', '%20'),'*]/Source[Abbreviation=', /q:query/q:src,']&amp;startIndex=',/q:query/q:startIndex,'&amp;resultCounter=',/q:query/q:numResults)"
+                    select="concat(/q:query/q:serviceUrl, '?query=MetaThesaurusConcept&amp;MetaThesaurusConcept[name=*',replace(/q:query/q:term, ' ', '%20'),'*]/Source[Abbreviation=', /q:query/q:src,']&amp;startIndex=',/q:query/q:startIndex,'&amp;pageSize=',/q:query/q:numResults)"
                 />
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of
-                    select="concat(/q:query/q:serviceUrl, '?query=MetaThesaurusConcept&amp;MetaThesaurusConcept[name=*',replace(/q:query/q:term, ' ', '%20'),'*]&amp;startIndex=',/q:query/q:startIndex,'&amp;resultCounter=',/q:query/q:numResults)"
+                    select="concat(/q:query/q:serviceUrl, '?query=MetaThesaurusConcept&amp;MetaThesaurusConcept[name=*',replace(/q:query/q:term, ' ', '%20'),'*]&amp;startIndex=',/q:query/q:startIndex,'&amp;pageSize=',/q:query/q:numResults)"
                 />
             </xsl:otherwise>
         </xsl:choose>
