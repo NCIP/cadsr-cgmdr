@@ -304,6 +304,7 @@ namespace ExcelQueryServiceAddIn
             Excel.Range selected = (Excel.Range)this.Application.Selection;
             System.Collections.IEnumerator ir = selected.Hyperlinks.GetEnumerator();
 
+            bool concept = false;
             string hAddy = "";
             string hName = "";
             if (ir != null)
@@ -339,8 +340,12 @@ namespace ExcelQueryServiceAddIn
                     c.Next.Next.Next.Clear();
                     list.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
                 }
+                else
+                    concept = true;
             }
             else
+                concept = true;
+            if (concept)
             {
                 string[] codes = selected.Text.ToString().Split(';');
                 selected.Cells.Clear();
