@@ -125,43 +125,44 @@ namespace ExcelQueryServiceAddIn
                             c.Next.Next.Next.Clear();
                             list.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
 
+
                         }
-                    }
-                    else
-                    {
-
-                        Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
-                        string[] codes = selected.Text.ToString().Split(';');
-
-                        selected.Cells.Clear();
-                        selected.Cells.ClearContents();
-                        selected.Cells.ClearFormats();
-                        selected.Cells.ClearNotes();
-
-                        if (conceptList != null)
+                        else
                         {
-                            conceptList.Unprotect("dummy_password");
 
-                            //Use Excel built-in Find feature to search for matched row
-                            foreach (String code in codes)
+                            Excel.Worksheet conceptList = (Excel.Worksheet)this.Application.Sheets["concept_list"];
+                            string[] codes = selected.Text.ToString().Split(';');
+
+                            selected.Cells.Clear();
+                            selected.Cells.ClearContents();
+                            selected.Cells.ClearFormats();
+                            selected.Cells.ClearNotes();
+
+                            if (conceptList != null)
                             {
-                                string c = code.Split(':')[0];
-                                Excel.Range found = conceptList.Cells.Find(c, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
-                                if (found != null)
+                                conceptList.Unprotect("dummy_password");
+
+                                //Use Excel built-in Find feature to search for matched row
+                                foreach (String code in codes)
                                 {
-                                    int counter = Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString()) - 1;
-                                    if (counter < 1)
+                                    string c = code.Split(':')[0];
+                                    Excel.Range found = conceptList.Cells.Find(c, Type.Missing, Excel.XlFindLookIn.xlValues, Excel.XlLookAt.xlPart, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, false, Type.Missing, Type.Missing);
+                                    if (found != null)
                                     {
-                                        found.EntireRow.Delete(Type.Missing); //Remove entire row
-                                    }
-                                    else
-                                    {
-                                        found.Next.Next.Next.Next.Value2 = counter;
+                                        int counter = Convert.ToInt16(found.Next.Next.Next.Next.Value2.ToString()) - 1;
+                                        if (counter < 1)
+                                        {
+                                            found.EntireRow.Delete(Type.Missing); //Remove entire row
+                                        }
+                                        else
+                                        {
+                                            found.Next.Next.Next.Next.Value2 = counter;
+                                        }
                                     }
                                 }
-                            }
 
-                            conceptList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                                conceptList.Protect("dummy_password", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                            }
                         }
                     }
                 }
