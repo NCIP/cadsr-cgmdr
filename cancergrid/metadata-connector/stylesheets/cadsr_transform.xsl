@@ -268,6 +268,9 @@
 			<registration-status>
 				<xsl:value-of select="registrationStatus"/>
 			</registration-status>
+			<context>
+				<xsl:value-of select="context/Context/name"/>
+			</context>
 			<xsl:apply-templates select="conceptDerivationRule/ConceptDerivationRule/componentConceptCollection"/>
 		</representation-term>
 	</xsl:template>
