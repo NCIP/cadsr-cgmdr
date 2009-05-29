@@ -330,7 +330,9 @@ namespace ExcelQueryServiceAddIn
                     {
                         c = (Excel.Range)list.Cells[i, 1];
                         string text = c.Text.ToString();
-                        if (text.Contains(hId))
+                        Excel.Range ce = (Excel.Range)list.Cells[i, 4];
+                        string cText = ce.Text.ToString();
+                        if (text.Contains(hId) || cText.Contains(hId))
                             break;
                     }
 

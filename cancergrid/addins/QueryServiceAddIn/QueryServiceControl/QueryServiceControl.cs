@@ -670,7 +670,7 @@ namespace QueryServiceControl
                     if (x.Element(rs + "enumerated") != null && x.Element(rs + "enumerated").Element(rs + "valid-value") != null)
                     {
 
-                        if (x.Element(rs + "enumerated").Element(rs + "valid-value").Element(rs + "conceptCollection") != null)
+                        if (x.Elements(rs + "conceptCollection") != null)
                         {
                             var enumeratedValues = from ev in x.Element(rs + "enumerated").Elements(rs + "valid-value")
                                                    select new

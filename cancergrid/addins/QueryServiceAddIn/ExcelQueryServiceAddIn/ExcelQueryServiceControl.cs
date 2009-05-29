@@ -828,7 +828,7 @@ namespace ExcelQueryServiceAddIn
                 c.Next.Next.Next.Value2 = attr.Trim().Replace(",", "\n\n").Replace("&#44;", ", ").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
 
                 //Cells mapped counter
-                c.Next.Next.Next.Next.Value2 = 1;
+                //c.Next.Next.Next.Next.Value2 = 1;
             }
             else
             {
