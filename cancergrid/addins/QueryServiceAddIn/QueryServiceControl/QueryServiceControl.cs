@@ -313,8 +313,8 @@ namespace QueryServiceControl
         private void listResults(XmlNodeList results, ListBox target)
         {
             target.Items.Clear();
-
             bool filtered = false;
+
             int itemsShown = 0;
 
             string[] restrictedW = new string[7];
@@ -601,6 +601,7 @@ namespace QueryServiceControl
                 XmlNode ccNode = null;
                 XmlNode ocNode = null;
                 XmlNode propNode = null;
+
                 
                 if (sender.Equals(lstClassificationQueryResult))
                 {
@@ -615,6 +616,7 @@ namespace QueryServiceControl
                     {
                         nodeId = getSelectedItem(lstResults).ID;
                         nodeId = nodeId.Substring(nodeId.LastIndexOf('-') + 1);
+                        
                     }
                     defNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:definition", nsmanager);
                     ccNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/*[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:conceptCollection", nsmanager);
@@ -649,9 +651,10 @@ namespace QueryServiceControl
                     }
                 }
 
+
+                XNamespace rs = "http://cancergrid.org/schema/result-set";
                 other = buildOtherContent();
-
-
+                string alternate = buildAlternateContent(rs);
              
                 if (sender.Equals(lstClassificationQueryResult))
                 {
@@ -661,9 +664,9 @@ namespace QueryServiceControl
                 {
                     wbDetailsDef.DocumentText = definition;
                     wbDetailsOther.DocumentText = other;
+                    wbAltDetails.DocumentText = alternate;
                 }
-
-                XNamespace rs = "http://cancergrid.org/schema/result-set";
+                
                 if (vdNode != null)
                 {
                     XElement x = XElement.Parse(vdNode.OuterXml);
@@ -857,6 +860,67 @@ namespace QueryServiceControl
             }
 
             return other;
+        }
+
+        private string buildAlternateContent(XNamespace rs)
+        {
+            string ret = "<p>";
+
+           XmlNode altnameNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:names/rs:all-names", nsmanager);
+           XmlNode altdefNode = lastResult.DocumentElement.SelectSingleNode("/rs:result-set/rs:concept[rs:names/rs:id = '" + getSelectedItem(lstResults).ID + "']/rs:all-definitions", nsmanager);
+
+           if (altnameNode == null || altnameNode.InnerXml.Length == 0 || altnameNode.HasChildNodes == false)
+           {
+               ret = "<p><div style=\"font-size: 12px; text-aligh: justify;\">(No alternate names supplied)</div>";
+           }
+           else
+           {
+               XElement x = XElement.Parse(altnameNode.OuterXml);
+               var properties = from p in x.Elements(rs + "name")
+                                orderby p.Element(rs + "type").Value
+                                select new
+                                {
+                                    Type = p.Element(rs + "type").Value,
+                                    Value = p.Element(rs + "value").Value,
+                                    Source = p.Element(rs+ "source").Value
+                                };
+               ret = "<p><table style=\"font-size: 12px;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;colspan=\"3\";text-align: left;padding: 5px;\">Names</th></tr>";
+                   
+               ret+="<tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Type</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Source</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Value</th></tr>";
+
+               foreach (var prop in properties)
+               {
+                   ret += "<tr><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + prop.Type + "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + prop.Source + "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + prop.Value + "</td></tr>";
+               }
+               ret += "</table>";
+           }
+
+           if (altdefNode == null || altdefNode.InnerXml.Length == 0 || altdefNode.HasChildNodes == false)
+           {
+               ret += "<p><div style=\"font-size: 12px; text-aligh: justify;\">(No alternate definitions supplied)</div>";
+           }
+           else
+           {
+               XElement x = XElement.Parse(altdefNode.OuterXml);
+               var properties = from p in x.Elements(rs + "definition")
+                                orderby p.Element(rs + "type").Value
+                                select new
+                                {
+                                    Type = p.Element(rs + "type").Value,
+                                    Value = p.Element(rs + "value").Value,
+                                    Source = p.Element(rs + "source").Value
+                                };
+               ret += "<p><table style=\"font-size: 12px;border: 1px solid #ddd;border-collapse: collapse;\"><tr><th style=\"background-color: #ddd;color: #000;colspan=\"3\";text-align: left;padding: 5px;\">Definitions</th></tr>";
+               ret+="<tr><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Type</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Source</th><th style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Value</th></tr>";
+
+               foreach (var prop in properties)
+               {
+                   ret += "<tr><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + prop.Type + "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + prop.Source + "</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + prop.Value + "</td></tr>";
+               }
+               ret += "</table>";
+           }
+
+           return ret;
         }
 
         private string formatBasicInfo(XmlNode node, XNamespace rs)

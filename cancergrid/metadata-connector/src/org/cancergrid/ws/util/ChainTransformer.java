@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2005-2008 CancerGrid Consortium <http://www.cancergrid.org/>
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
- * this software and associated documentation files (the "Software"), to deal in the 
- * Software without restriction, including without limitation the rights to use, copy, 
- * modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,  
- * and to permit persons to whom the Software is furnished to do so, subject to the 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in the
+ * Software without restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the
  * following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies 
+ * The above copyright notice and this permission notice shall be included in all copies
  * or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+ * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
 
@@ -46,24 +46,24 @@ import org.w3c.dom.Node;
 /**
  * This is a utility class to help construct a chain of XSLT templates to be applied to
  * an input XML one after another in sequence.
- * 
+ *
  * @author <a href="mailto:Andrew.Tsui@comlab.ox.ac.uk">Andrew Tsui</a> (<a href="http://www.cancergrid.org">CancerGrid Consortium</a>)
  * @version 1.1
  */
-public class ChainTransformer 
+public class ChainTransformer
 {
 	/**
 	 * Log4J Logger
 	 */
 	private static Logger LOG = Logger.getLogger(ChainTransformer.class);
-	
+
 	/**
 	 * container to store XSLT templates
 	 */
 	protected Map<String, Templates> chain = null;
-	
-	private static SAXTransformerFactory factory = null; 
-	
+
+	private static SAXTransformerFactory factory = null;
+
 	/**
 	 * Constructor. Initialises the transform chain
 	 *
@@ -81,7 +81,7 @@ public class ChainTransformer
 		}
 		chain = new Hashtable<String, Templates>();
 	}
-	
+
 	/**
 	 * Add a template into the chain
 	 * @param label used to reference the templates in the chain
@@ -91,35 +91,35 @@ public class ChainTransformer
 	{
 		chain.put(label, t);
 	}
-	
+
 	/**
 	 * Create a template from the given XSLT file and add it into the chain
-	 * 
+	 *
 	 * @param label used to reference the template in the chain
 	 * @param xsl_path path to an XSLT file
 	 */
 	public void addTemplate(String label, String xsl_path)
 	{
-		try 
+		try
 		{
 			chain.put(label, createTemplate(xsl_path));
-		} 
+		}
 		catch (Exception e)
 		{
 			LOG.error("Unable to add template to chain.");
 		}
 	}
-	
+
 	/**
 	 * Remove the specified template from the chain
-	 * 
+	 *
 	 * @param label used to reference the template in the chain
 	 */
 	public void deleteTemplate(String label)
 	{
 		chain.remove(label);
 	}
-	
+
 	/**
 	 * Get a reference to a template in the chain
 	 * @param label
@@ -129,10 +129,10 @@ public class ChainTransformer
 	{
 		return chain.get(label);
 	}
-	
+
 	/**
 	 * Apply the transform chain in default sequence to a given XML
-	 * 
+	 *
 	 * @param input XML to transform
 	 * @return result of the XSLT transforms
 	 */
@@ -151,12 +151,12 @@ public class ChainTransformer
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Apply the transform chain in custom sequence to a given XML. This is useful for
-	 * controlling the stages of transform. e.g. for inspecting intermediate transform 
+	 * controlling the stages of transform. e.g. for inspecting intermediate transform
 	 * results.
-	 * 
+	 *
 	 * @param input XML to transform
 	 * @param sequence The sequence of templates to apply
 	 * @return result of the XSLT transforms
@@ -171,7 +171,7 @@ public class ChainTransformer
 				buffer = buffer.replace("&lt;", "<");
 				buffer = buffer.replace("&gt;", ">");
 			}
-			
+
 			for (String label : sequence)
 			{
 				LOG.debug("Label: "+label);
@@ -187,7 +187,7 @@ public class ChainTransformer
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Clear the chain
 	 *
@@ -196,14 +196,14 @@ public class ChainTransformer
 	{
 		chain.clear();
 	}
-	
+
 	/**
 	 * Convenient method to do a single transform.
-	 * 
+	 *
 	 * @param input XML to transform
 	 * @param template template to use
 	 * @return result of the XSLT transforms
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static String transform(String input, Templates template) throws Exception
 	{
@@ -216,12 +216,14 @@ public class ChainTransformer
 		transformer.transform(source, result);
 		transformer.clearParameters();
 		transformer.reset();
-		return output.toString();
+		String ret = output.toString();
+		output.close();
+		return ret;
 	}
-	
+
 	/**
 	 * Convenient method to do a single transform.
-	 * 
+	 *
 	 * @param n an XML DOM node
 	 * @param template template to use
 	 * @return result of the XSLT transforms
@@ -237,14 +239,14 @@ public class ChainTransformer
 		transformer.transform(source, result);
 		return output.toString();
 	}
-	
+
 	/**
 	 * Convenient method to do a single transform.
-	 * 
+	 *
 	 * @param xml XML to transform
 	 * @param xsl XSL to use
 	 * @return result of the XSLT transforms
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static String transform(String xml, String xsl) throws Exception
 	{
@@ -267,11 +269,11 @@ public class ChainTransformer
 		Transformer transform = template.newTransformer();
 		transform.transform(source, result);
 		return output.toString();
-	}   
-	
+	}
+
 	/**
 	 * Convenient method to create a new transformer from a given file path
-	 * 
+	 *
 	 * @param xsl_path path to XSLT file
 	 * @return a template created using the given XSLT
 	 */
@@ -292,10 +294,10 @@ public class ChainTransformer
 		Templates template = factory.newTemplates(new StreamSource(new FileInputStream(xsl_path)));
 		return template;
 	}
-	
+
 	/**
 	 * Convenient method to create a new transformer from a given file path
-	 * 
+	 *
 	 * @param xsl XSLT file
 	 * @return a template created using the given XSLT
 	 */
@@ -316,10 +318,10 @@ public class ChainTransformer
 		Templates template = factory.newTemplates(new StreamSource(new FileInputStream(xsl)));
 		return template;
 	}
-	
+
 	/**
 	 * Convenient method to create a new transformer from a given file path
-	 * 
+	 *
 	 * @param xsl input stream to XSLT content
 	 * @return a template created using the given XSLT
 	 */
@@ -340,10 +342,10 @@ public class ChainTransformer
 		Templates template = factory.newTemplates(new StreamSource(xsl));
 		return template;
 	}
-	
+
 	/**
 	 * Convenient method to create a new transformer from a given file path
-	 * 
+	 *
 	 * @param xsl XSLT content
 	 * @return a template created using the given XSLT
 	 */

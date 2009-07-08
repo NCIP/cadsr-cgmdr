@@ -27,6 +27,7 @@
 			<xs:element name="definition" type="xs:string"/>
 			<xs:element name="workflow-status" type="xs:string" minOccurs="0"/>
 			<xs:element name="context" type="xs:string" minOccurs="0"/>
+			<xs:element ref="all-definitions"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:element name="names" type="names"/>
@@ -40,7 +41,29 @@
 	<xs:element name="all-names" type="all-names"/>
 	<xs:complexType name="all-names">
 		<xs:sequence>
-			<xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="name" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="name" type="name"/>
+	<xs:complexType name="name">
+		<xs:sequence>
+			<xs:element name="type" type="xs:string"/>
+			<xs:element name="value" type="xs:string"/>
+			<xs:element name="source" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="all-definitions" type="all-definitions"/>
+	<xs:complexType name="all-definitions">
+		<xs:sequence>
+			<xs:element ref="definition" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="definition" type="definition"/>
+	<xs:complexType name="definition">
+		<xs:sequence>
+			<xs:element name="type" type="xs:string"/>
+			<xs:element name="value" type="xs:string"/>
+			<xs:element name="source" type="xs:string"/>
 		</xs:sequence>
 	</xs:complexType>
 	<!-- Data element related elements/types -->

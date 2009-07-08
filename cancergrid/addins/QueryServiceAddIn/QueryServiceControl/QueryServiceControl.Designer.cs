@@ -49,6 +49,7 @@
             this.wbDetailsPropsValues = new System.Windows.Forms.WebBrowser();
             this.otherDetails = new System.Windows.Forms.TabPage();
             this.wbDetailsOther = new System.Windows.Forms.WebBrowser();
+            this.altDetails = new System.Windows.Forms.TabPage();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabFreeText = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -72,6 +73,7 @@
             this.wbClassificationQueryResultDef = new System.Windows.Forms.WebBrowser();
             this.tabPageCLSDetailsValueDomain = new System.Windows.Forms.TabPage();
             this.wbClassificationQueryResultValueDomain = new System.Windows.Forms.WebBrowser();
+            this.wbAltDetails = new System.Windows.Forms.WebBrowser();
             this.grpControls.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.grpResults.SuspendLayout();
@@ -81,6 +83,7 @@
             this.tabPageDef.SuspendLayout();
             this.tabPagePropsValues.SuspendLayout();
             this.otherDetails.SuspendLayout();
+            this.altDetails.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabFreeText.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -277,6 +280,7 @@
             this.tabControlDetails.Controls.Add(this.tabPageDef);
             this.tabControlDetails.Controls.Add(this.tabPagePropsValues);
             this.tabControlDetails.Controls.Add(this.otherDetails);
+            this.tabControlDetails.Controls.Add(this.altDetails);
             this.tabControlDetails.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlDetails.Location = new System.Drawing.Point(3, 16);
             this.tabControlDetails.Name = "tabControlDetails";
@@ -344,6 +348,17 @@
             this.wbDetailsOther.Name = "wbDetailsOther";
             this.wbDetailsOther.Size = new System.Drawing.Size(260, 283);
             this.wbDetailsOther.TabIndex = 0;
+            // 
+            // altDetails
+            // 
+            this.altDetails.Controls.Add(this.wbAltDetails);
+            this.altDetails.Location = new System.Drawing.Point(4, 22);
+            this.altDetails.Name = "altDetails";
+            this.altDetails.Padding = new System.Windows.Forms.Padding(3);
+            this.altDetails.Size = new System.Drawing.Size(266, 289);
+            this.altDetails.TabIndex = 3;
+            this.altDetails.Text = "Alternate";
+            this.altDetails.UseVisualStyleBackColor = true;
             // 
             // tabControl
             // 
@@ -625,6 +640,15 @@
             this.wbClassificationQueryResultValueDomain.Size = new System.Drawing.Size(260, 204);
             this.wbClassificationQueryResultValueDomain.TabIndex = 0;
             // 
+            // wbAltDetails
+            // 
+            this.wbAltDetails.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.wbAltDetails.Location = new System.Drawing.Point(3, 3);
+            this.wbAltDetails.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wbAltDetails.Name = "wbAltDetails";
+            this.wbAltDetails.Size = new System.Drawing.Size(260, 283);
+            this.wbAltDetails.TabIndex = 0;
+            // 
             // QueryServiceControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -645,6 +669,7 @@
             this.tabPageDef.ResumeLayout(false);
             this.tabPagePropsValues.ResumeLayout(false);
             this.otherDetails.ResumeLayout(false);
+            this.altDetails.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabFreeText.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
@@ -709,5 +734,7 @@
         private System.Windows.Forms.TabPage otherDetails;
         private System.Windows.Forms.WebBrowser wbDetailsOther;
         private System.Windows.Forms.Button btnAnnotate;
+        private System.Windows.Forms.TabPage altDetails;
+        private System.Windows.Forms.WebBrowser wbAltDetails;
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using Office = Microsoft.Office.Core;
+using System.IO;
 
 namespace ExcelQueryServiceAddIn
 {
@@ -18,7 +19,37 @@ namespace ExcelQueryServiceAddIn
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            AddUnmapButtonMenuCommand();
+            StreamWriter log;
+            if (!File.Exists("C:\\cancergridlogfile.txt"))
+            {
+                log = new StreamWriter("C:\\cancergridlogfile.txt");
+            }
+            else
+            {
+                log = File.AppendText("C:\\cancergridlogfile.txt");
+            }
+            log.WriteLine(DateTime.Now);
+            log.WriteLine("Starting Cancergrid Add-in");
+            log.WriteLine();
+
+            try
+            {
+                AddUnmapButtonMenuCommand();
+            }
+            catch (Exception exc)
+            {
+            
+                // Write to the file:
+                log.WriteLine(DateTime.Now);
+                log.WriteLine(exc.Message);
+                log.WriteLine();
+
+                // Close the stream:
+                
+            } finally
+            {
+                log.Close();
+            }
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
