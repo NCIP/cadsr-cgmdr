@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using Office = Microsoft.Office.Core;
 using System.IO;
+using System.Diagnostics;
 
 namespace ExcelQueryServiceAddIn
 {
@@ -17,20 +18,29 @@ namespace ExcelQueryServiceAddIn
         private Office.CommandBarButton CellUnmapButton;
         private Office.CommandBarButton ClearInListButton;
 
+        private TextWriterTraceListener traceListener { get; set; }
+
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            StreamWriter log;
-            if (!File.Exists("C:\\cancergridlogfile.txt"))
-            {
-                log = new StreamWriter("C:\\cancergridlogfile.txt");
-            }
-            else
-            {
-                log = File.AppendText("C:\\cancergridlogfile.txt");
-            }
-            log.WriteLine(DateTime.Now);
-            log.WriteLine("Starting Cancergrid Add-in");
-            log.WriteLine();
+            //StreamWriter log;
+            //if (!File.Exists("C:\\cancergridlogfile.txt"))
+            //{
+            //    log = new StreamWriter("C:\\cancergridlogfile.txt");
+            //}
+            //else
+            //{
+            //    log = File.AppendText("C:\\cancergridlogfile.txt");
+            //}
+            //log.WriteLine(DateTime.Now);
+            //log.WriteLine("Starting Cancergrid Add-in");
+            //log.WriteLine();
+
+            //Use "Debug" if no log should be generated for release mode. "Trace" generate log on both debug and release mode.
+            FileStream traceLog = new FileStream(@"C:\temp\cancergridlogfile.txt", FileMode.Append);
+            traceListener = new TextWriterTraceListener(traceLog);
+            Trace.Listeners.Add(traceListener);
+
+            Trace.WriteLine(DateTime.Now + "    Starting Cancergrid Add-in");
 
             try
             {
@@ -40,15 +50,22 @@ namespace ExcelQueryServiceAddIn
             {
             
                 // Write to the file:
-                log.WriteLine(DateTime.Now);
-                log.WriteLine(exc.Message);
-                log.WriteLine();
+                //log.WriteLine(DateTime.Now);
+                //log.WriteLine(exc.Message);
+                //log.WriteLine();
+
+                Trace.WriteLine(DateTime.Now + "    " + exc.Message);
 
                 // Close the stream:
                 
             } finally
             {
-                log.Close();
+                //log.Close();
+                traceListener.Close();
+                if (Trace.Listeners.Contains(traceListener))
+                {
+                    Trace.Listeners.Remove(traceListener);
+                }
             }
         }
 

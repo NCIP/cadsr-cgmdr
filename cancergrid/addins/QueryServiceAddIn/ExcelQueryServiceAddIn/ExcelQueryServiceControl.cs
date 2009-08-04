@@ -514,8 +514,8 @@ namespace ExcelQueryServiceAddIn
                     {
                         selected.Validation.Add(Excel.XlDVType.xlValidateDate, Excel.XlDVAlertStyle.xlValidAlertStop, Excel.XlFormatConditionOperator.xlGreaterEqual, "=DATE(1900,1,1)", "=DATE(1900,1,1)");
                         selected.Validation.InputTitle = "Enter a date";
-                        selected.Validation.InputMessage = "Date format: =DATE(year,month,day)";
-                        selected.Validation.ErrorMessage = "Please enter correct date format: =DATE(year,month,day)";
+                        selected.Validation.InputMessage = "Enter a date"; // Using Date() will set value for all mapped cells
+                        selected.Validation.ErrorMessage = "Please enter correct date format";
                     }
                     else if (attr == "xs:boolean")
                     {

@@ -653,8 +653,10 @@ namespace QueryServiceControl
 
 
                 XNamespace rs = "http://cancergrid.org/schema/result-set";
-                other = buildOtherContent();
-                string alternate = buildAlternateContent(rs);
+
+                //Temp move to free text search section
+                //other = buildOtherContent();
+                //string alternate = buildAlternateContent(rs);
              
                 if (sender.Equals(lstClassificationQueryResult))
                 {
@@ -663,8 +665,8 @@ namespace QueryServiceControl
                 else if (sender.Equals(lstResults))
                 {
                     wbDetailsDef.DocumentText = definition;
-                    wbDetailsOther.DocumentText = other;
-                    wbAltDetails.DocumentText = alternate;
+                    wbDetailsOther.DocumentText = buildOtherContent();// other;
+                    wbAltDetails.DocumentText = buildAlternateContent(rs);// alternate;
                 }
                 
                 if (vdNode != null)
