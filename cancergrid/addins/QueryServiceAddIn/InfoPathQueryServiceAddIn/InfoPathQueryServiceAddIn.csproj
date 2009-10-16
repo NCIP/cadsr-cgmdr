@@ -26,16 +26,17 @@
     <RootNamespace>InfoPathQueryServiceAddIn</RootNamespace>
     <AssemblyName>InfoPathQueryServiceAddIn</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ManifestCertificateThumbprint>806D44AB1712ED3F846F9E2E57A19F03361067C1</ManifestCertificateThumbprint>
-    <ManifestKeyFile>InfoPathQueryServiceAddIn_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>4563BE39521C2CEAC83EA5653962F6257725FB60</ManifestCertificateThumbprint>
+    <ManifestKeyFile>InfoPathQueryServiceAddIn_1_TemporaryKey.pfx</ManifestKeyFile>
     <SignManifests>true</SignManifests>
-    <IsWebBootstrapper>True</IsWebBootstrapper>
+    <IsWebBootstrapper>False</IsWebBootstrapper>
     <SignAssembly>false</SignAssembly>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <PublishUrl>http://cg1.comlab.ox.ac.uk/sites/TrialDesigners/Downloads/</PublishUrl>
-    <InstallUrl>http://cg1.comlab.ox.ac.uk/sites/TrialDesigners/Downloads/</InstallUrl>
+    <PublishUrl>C:\projects\cgmdr-nci\cancergrid\addin\Infopath2007AddIn\</PublishUrl>
+    <InstallUrl>
+    </InstallUrl>
     <TargetCulture>en</TargetCulture>
-    <ApplicationVersion>1.0.0.44</ApplicationVersion>
+    <ApplicationVersion>1.0.0.45</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -221,6 +222,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="InfoPathQueryServiceAddIn_1_TemporaryKey.pfx" />
     <None Include="InfoPathQueryServiceAddIn_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -1,7 +1,6 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <PublishUrlHistory>
-    </PublishUrlHistory>
+    <PublishUrlHistory>C:\projects\cgmdr-nci\cancergrid\addin\Infopath2007AddIn\</PublishUrlHistory>
     <InstallUrlHistory>https://localhost:7080/AddIn/|http://cg1.comlab.ox.ac.uk/sites/TrialDesigners/Downloads/|http://localhost:7080/AddIn/|http://129.67.150.57:7080/AddIn/</InstallUrlHistory>
   </PropertyGroup>
   <ProjectExtensions>

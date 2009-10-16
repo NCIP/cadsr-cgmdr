@@ -50,6 +50,7 @@
             this.otherDetails = new System.Windows.Forms.TabPage();
             this.wbDetailsOther = new System.Windows.Forms.WebBrowser();
             this.altDetails = new System.Windows.Forms.TabPage();
+            this.wbAltDetails = new System.Windows.Forms.WebBrowser();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabFreeText = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -73,7 +74,6 @@
             this.wbClassificationQueryResultDef = new System.Windows.Forms.WebBrowser();
             this.tabPageCLSDetailsValueDomain = new System.Windows.Forms.TabPage();
             this.wbClassificationQueryResultValueDomain = new System.Windows.Forms.WebBrowser();
-            this.wbAltDetails = new System.Windows.Forms.WebBrowser();
             this.grpControls.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.grpResults.SuspendLayout();
@@ -360,6 +360,15 @@
             this.altDetails.Text = "Alternate";
             this.altDetails.UseVisualStyleBackColor = true;
             // 
+            // wbAltDetails
+            // 
+            this.wbAltDetails.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.wbAltDetails.Location = new System.Drawing.Point(3, 3);
+            this.wbAltDetails.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wbAltDetails.Name = "wbAltDetails";
+            this.wbAltDetails.Size = new System.Drawing.Size(260, 283);
+            this.wbAltDetails.TabIndex = 0;
+            // 
             // tabControl
             // 
             this.tabControl.Controls.Add(this.tabFreeText);
@@ -639,15 +648,6 @@
             this.wbClassificationQueryResultValueDomain.Name = "wbClassificationQueryResultValueDomain";
             this.wbClassificationQueryResultValueDomain.Size = new System.Drawing.Size(260, 204);
             this.wbClassificationQueryResultValueDomain.TabIndex = 0;
-            // 
-            // wbAltDetails
-            // 
-            this.wbAltDetails.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.wbAltDetails.Location = new System.Drawing.Point(3, 3);
-            this.wbAltDetails.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wbAltDetails.Name = "wbAltDetails";
-            this.wbAltDetails.Size = new System.Drawing.Size(260, 283);
-            this.wbAltDetails.TabIndex = 0;
             // 
             // QueryServiceControl
             // 

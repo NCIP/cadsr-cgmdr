@@ -41,7 +41,7 @@ return
                             for $altName in ($concept/@skos:prefLabel|$concept/@skos:altLabel|$concept/@skos:hiddenLabel|$concept/@skos:altLabel|$concept/skos:hiddenLabel|$concept/skos:altLabel)
                             order by $altName
                             return
-                                <name>{data($altName)}</name>
+                                <name><type/><source/><value>{data($altName)}</value></name>  
                         }
                         </all-names>
                     </names>

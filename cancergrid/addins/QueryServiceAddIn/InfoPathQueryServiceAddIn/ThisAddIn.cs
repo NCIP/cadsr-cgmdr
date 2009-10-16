@@ -118,8 +118,9 @@ namespace InfoPathQueryServiceAddIn
             {
                 mainMenuBar = ((Office.CommandBars)this.Application.ActiveWindow.CommandBars).ActiveMenuBar;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                string message = e.Message;
                 return;
             }
 
