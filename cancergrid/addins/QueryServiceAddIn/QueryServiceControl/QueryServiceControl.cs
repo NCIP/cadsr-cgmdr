@@ -816,8 +816,15 @@ namespace QueryServiceControl
                         wbDetailsPropsValues.DocumentText = props;
                     }
                 }
-                else wbDetailsPropsValues.DocumentText = "No information retrieved";
-                
+                else
+                {
+                    //If no other properties were found, show the ID.
+                    props = "<table style=\"font-size: 12px;border: 1px solid #ddd;border-collapse: collapse;\">";
+                    props += "<tr><th colspan=2 style=\"background-color: #ddd;color: #000;text-align: left;padding: 5px;\">Properties</th></tr>";
+                    props += "<tr><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">ID</td><td style=\"border: 1px solid #ddd;padding: 5px;vertical-align: top;\">" + getSelectedItem(lstResults).ID + "</td></tr></table>";
+
+                    wbDetailsPropsValues.DocumentText = props;
+                }
 
             }
             catch (Exception ex)
