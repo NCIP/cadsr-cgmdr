@@ -1,5 +1,5 @@
 #eXist build info (updated using svnkit)
-#Thu Apr 30 14:48:27 EDT 2009
+#Fri Oct 16 11:38:39 EDT 2009
 project.version=1.2.2
-project.build=20090430
-svn.revision=8963
+project.build=20091016
+svn.revision=10227
