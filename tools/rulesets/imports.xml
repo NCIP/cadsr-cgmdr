@@ -1,5 +1,12 @@
 <?xml version="1.0"?>
 
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <ruleset name="Import Statement Rules" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../etc/ruleset_xml_schema.xml">
   <description>

@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*
  * Created on 17.03.2005 - $Id: XQueryFunctionsTest.java 6910 2007-11-12 19:08:42Z brihaye $
  */

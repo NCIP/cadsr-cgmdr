@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*
  *  XFormsFilter
  *  Copyright (C) 2006 Adam Retter, Devon Portal Project <adam.retter@devon.gov.uk>

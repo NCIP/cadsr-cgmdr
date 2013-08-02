@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*
  *  eXist Scheduler Module Extension DeleteSheduledJob
  *  Copyright (C) 2006 Adam Retter <adam.retter@devon.gov.uk>

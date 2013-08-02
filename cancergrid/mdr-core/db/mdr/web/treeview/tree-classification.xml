@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <treeview>
     <folder title="CancerGrid Classification Scheme" img="images/white_circle.gif" expanded="true">
         <folder title="Minimum Cancer Dataset" img="images/white_circle.gif" expanded="true" code="06D67D8B6">

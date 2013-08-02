@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*
  * Created on 5 sept. 2004
 $Id: Statistics.java 5418 2007-02-28 18:16:40Z chrisdutz $

@@ -1,3 +1,10 @@
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <!-- $Id: build.xml 6849 2007-11-02 13:53:18Z dizzzz $ -->
 <project basedir="." default="all" name="fluent">
 

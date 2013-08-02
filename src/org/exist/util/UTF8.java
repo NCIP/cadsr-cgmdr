@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /* 
  *  `gnu.iou' I/O buffers and utilities.
  *  Copyright (C) 1998, 1999, 2000, 2001, 2002 John Pritchard.

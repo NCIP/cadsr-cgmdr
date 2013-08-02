@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <cgMDR:Data_Element xmlns:cgMDR="http://www.cancergrid.org/schema/cgMDR" item_registration_authority_identifier="GB-CANCERGRID" data_identifier="4EAB6BB64" version="0.11">
     <cgMDR:administered_item_administration_record>
         <cgMDR:administrative_note>curation of Neat Annual Followup form</cgMDR:administrative_note>

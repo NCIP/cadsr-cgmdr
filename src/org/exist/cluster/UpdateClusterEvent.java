@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 //$Id: UpdateClusterEvent.java 2435 2006-01-07 20:54:45Z brihaye $
 package org.exist.cluster;
 

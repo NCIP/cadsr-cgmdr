@@ -1,4 +1,12 @@
 <?xml-stylesheet href="shakes.xsl" type="text/xsl"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <!DOCTYPE PLAY PUBLIC "-//VALIDATION//EN" "hamlet.dtd">
 <!-- $Id: hamlet_invalid.xml 5915 2007-05-28 16:52:11Z dizzzz $ -->
 <PLAY>

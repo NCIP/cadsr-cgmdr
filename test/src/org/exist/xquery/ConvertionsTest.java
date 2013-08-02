@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*
  * Created on 04.07.2005 - $Id: ConvertionsTest.java 4829 2006-11-18 00:47:24Z dizzzz $
  */

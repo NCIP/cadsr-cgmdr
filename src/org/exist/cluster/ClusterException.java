@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 //$Id: ClusterException.java 985 2005-01-29 14:57:28Z fmondora $
 package org.exist.cluster;
 

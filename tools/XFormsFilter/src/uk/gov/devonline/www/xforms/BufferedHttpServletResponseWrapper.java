@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*
  *  XFormsFilter: BufferedHttpServletResponseWrapper
  *  Copyright (C) 2006 Matthijs Wensveen <m.wensveen@func.nl>

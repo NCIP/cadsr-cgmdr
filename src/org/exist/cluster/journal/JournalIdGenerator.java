@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 //$Id: JournalIdGenerator.java 2134 2005-11-27 23:14:00Z brihaye $
 package org.exist.cluster.journal;
 

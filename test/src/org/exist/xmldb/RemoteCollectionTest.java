@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*
  * Created on 20 juil. 2004
 $Id: RemoteCollectionTest.java 4829 2006-11-18 00:47:24Z dizzzz $

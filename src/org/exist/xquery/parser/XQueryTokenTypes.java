@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 // $ANTLR 2.7.7 (2006-11-01): "XQuery.g" -> "XQueryParser.java"$
 
 	package org.exist.xquery.parser;

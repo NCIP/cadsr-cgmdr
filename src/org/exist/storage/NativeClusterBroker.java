@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 //$Id: NativeClusterBroker.java 5783 2007-05-06 17:36:34Z brihaye $
 package org.exist.storage;
 

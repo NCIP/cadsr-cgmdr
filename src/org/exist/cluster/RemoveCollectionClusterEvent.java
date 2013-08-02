@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 //$Id: RemoveCollectionClusterEvent.java 1582 2005-08-16 07:33:52Z nbreda $
 package org.exist.cluster;
 

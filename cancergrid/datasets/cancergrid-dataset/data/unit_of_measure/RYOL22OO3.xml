@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <cgMDR:Unit_of_Measure xmlns:cgMDR="http://www.cancergrid.org/schema/cgMDR" unit_of_measure_identifier="RYOL22OO3">
     <cgMDR:unit_of_measure_name >mmhg</cgMDR:unit_of_measure_name>
     <cgMDR:unit_of_measure_precision >0</cgMDR:unit_of_measure_precision>

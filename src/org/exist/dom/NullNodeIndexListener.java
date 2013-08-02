@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*  $Id: NullNodeIndexListener.java 4163 2006-08-24 14:23:13Z wolfgang_m $ */
 
 package org.exist.dom;

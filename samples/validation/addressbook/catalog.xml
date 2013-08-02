@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <!-- $Id: catalog.xml 5915 2007-05-28 16:52:11Z dizzzz $ -->
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <uri name="http://jmvanel.free.fr/xsd/addressBook" uri="addressbook.xsd"/>

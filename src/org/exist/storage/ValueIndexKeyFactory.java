@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /* Created on 27 mai 2005
 $Id: ValueIndexKeyFactory.java 6320 2007-08-01 18:01:06Z ellefj $ */
 package org.exist.storage;

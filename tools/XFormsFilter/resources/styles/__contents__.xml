@@ -1,3 +1,10 @@
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <collection xmlns="http://exist.sourceforge.net/NS/exist" name="/db/system/xformsfilter" owner="admin" group="dba" mode="775" created="2008-05-30T15:37:58+01:00" version="1">
     <resource type="BinaryResource" name="xforms.css" owner="admin" group="dba" mode="755" created="2008-05-30T15:38:07+01:00" modified="2008-05-30T15:38:07+01:00" filename="xforms.css" mimetype="text/css"/>
 </collection>

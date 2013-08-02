@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <cgMDR:Reference_Document xmlns:cgMDR="http://www.cancergrid.org/schema/cgMDR" reference_document_identifier="tango_rand_form">
     <cgMDR:reference_document_language_identifier>eng</cgMDR:reference_document_language_identifier>
     <cgMDR:reference_document_title>Tango Clinic Randomisation Form version 3</cgMDR:reference_document_title>

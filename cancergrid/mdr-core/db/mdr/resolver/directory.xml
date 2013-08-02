@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <cgResolver:resolver xmlns:cgResolver="http://www.cancergrid.org/schema/cgResolver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="directory.xsd">
     <cgResolver:resource urn="urn:lsid:ebi.embl.org:embl:">
         <cgResolver:uri return="html" rank="1">http://www.ebi.ac.uk/cgi-bin/dbfetch?db=embl&amp;format=embl&amp;style=html&amp;id=</cgResolver:uri>

@@ -1,3 +1,10 @@
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <collection xmlns="http://exist.sourceforge.net/NS/exist" name="/db/mdr/selenium" owner="admin" group="dba" mode="755" created="2008-06-25T14:57:27+01:00" version="1">
     <subcollection name="core" filename="core"/>
 </collection>

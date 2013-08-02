@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 //$Id: ClusterInfoGenerator.java 6186 2007-07-08 20:16:23Z brihaye $
 package org.exist.cluster.cocoon;
 

@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <cgMDR:Non_Enumerated_Conceptual_Domain xmlns="http://www.w3.org/1999/xhtml" xmlns:cgMDR="http://www.cancergrid.org/schema/cgMDR" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  item_registration_authority_identifier="GB-CANCERGRID-OX" data_identifier="94784C2CB" version="0.1">
     <cgMDR:administered_item_administration_record>
         <cgMDR:administrative_note/>

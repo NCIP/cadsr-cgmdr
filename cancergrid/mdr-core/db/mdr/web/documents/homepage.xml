@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <div xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
     <div class="content_one_pane">
         <p>Welcome to the cancergrid ISO/IEC11179 compliant metadata repository.</p>

@@ -1,3 +1,10 @@
+/*L
+ * Copyright Oracle Inc
+ *
+ * Distributed under the OSI-approved BSD 3-Clause License.
+ * See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+ */
+
 /*
  *  eXist Apache FOP Transformation Extension
  *  Copyright (C) 2007 Craig Goodyer at the University of the West of England

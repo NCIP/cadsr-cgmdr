@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--L
+  Copyright Oracle Inc
+
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See http://ncip.github.com/cadsr-cgmdr/LICENSE.txt for details.
+L-->
+
 <cgRegression:mdr-tests xmlns:cgRegression="http://www.cancergrid.org/schema/cgRegression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../regression-test/regression-tests.xsd">
     <cgRegression:mdr-test type="web-page-comparison">
         <cgRegression:test-name>supported object class listing</cgRegression:test-name>
