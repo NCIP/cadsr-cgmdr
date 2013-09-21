@@ -76,7 +76,7 @@ Submitting Changes
 
   - Include a link to the pull request in the ticket
 
-.. _`BSD-3-Clause License`: http://opensource.org/licenses/BSD-3-Clause
+.. _`BSD 3-Clause License`: http://opensource.org/licenses/BSD-3-Clause
 .. _`tracker`: https://gforge.nci.nih.gov/tracker/?group_id=541
 
 --------------------
